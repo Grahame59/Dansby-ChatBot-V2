@@ -1,0 +1,9 @@
+* text=auto eol=lf
+
+# Treat these as text even if Git guesses otherwise
+*.cs   text
+*.csproj text
+*.sln  text
+*.json text
+*.yml  text
+*.md   text

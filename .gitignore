@@ -52,3 +52,26 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# IDE/user junk
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.rsuser
+*.userprefs
+*.DotSettings.user
+
+# Ad-hoc publish dirs (when you use -o publish)
+[Pp]ublish/
+
+# Logs & coverage
+*.log
+coverage/
+TestResults/
+
+# Env / local overrides (keep secrets out of git)
+.env
+*.env
+appsettings.*.local.json
