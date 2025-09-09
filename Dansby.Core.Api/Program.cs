@@ -17,11 +17,26 @@ var app = builder.Build();
 
 app.MapGet("/health", () => Results.Json(new { status = "ok" }));
 
-app.MapPost("/intents", async (IntentRequest req, IIntentQueue queue) =>
+app.MapPost("/intents", async (HttpRequest http, IntentRequest req, IIntentQueue queue, IHandlerRegistry reg) =>
 {
+    // 1) API key check
+    var configuredKey = app.Configuration["DANSBY_API_KEY"];
+    if (string.IsNullOrEmpty(configuredKey) ||
+        !http.Headers.TryGetValue("X-Api-Key", out var key) ||
+        key != configuredKey)
+    {
+        return Results.Unauthorized();
+    }
+
+    // 2) Basic validation
     if (string.IsNullOrWhiteSpace(req.Intent))
         return Results.BadRequest(new { error = "intent required" });
 
+    // (Optional) As of now, rejecting unknown intents early instead of dropping later
+    if (reg.Resolve(req.Intent.Trim()) is null)
+        return Results.BadRequest(new { error = $"unknown intent '{req.Intent}'" });
+
+    // 3) Build envelope and enqueue
     var env = new Envelope(
         Id: Guid.NewGuid().ToString(),
         Ts: DateTimeOffset.UtcNow,
