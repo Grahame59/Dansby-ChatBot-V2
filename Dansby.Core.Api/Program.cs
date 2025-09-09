@@ -3,54 +3,60 @@ using System.Text.Json;
 using Dansby.Shared;
 using Pipes.Nlp.Mapping;
 
-var builder = WebApplication.CreateBuilder(args);
-builder.Logging.ClearProviders();
-builder.Logging.AddSimpleConsole(o => { o.SingleLine = true; o.TimestampFormat = "HH:mm:ss "; });
-
-// DI: queue, registry, worker, handlers
-builder.Services.AddSingleton<IIntentQueue, InMemoryPriorityQueue>();
-builder.Services.AddSingleton<IHandlerRegistry, HandlerRegistry>();
-builder.Services.AddSingleton<IIntentHandler, NlpMatchHandler>(); // register "nlp.match"
-builder.Services.AddHostedService<DispatcherWorker>();
-
-var app = builder.Build();
-
-app.MapGet("/health", () => Results.Json(new { status = "ok" }));
-
-app.MapPost("/intents", async (HttpRequest http, IntentRequest req, IIntentQueue queue, IHandlerRegistry reg) =>
+internal class Program
 {
-    // 1) API key check
-    var configuredKey = app.Configuration["DANSBY_API_KEY"];
-    if (string.IsNullOrEmpty(configuredKey) ||
-        !http.Headers.TryGetValue("X-Api-Key", out var key) ||
-        key != configuredKey)
+    private static void Main(string[] args)
     {
-        return Results.Unauthorized();
+        var builder = WebApplication.CreateBuilder(args);
+        builder.Logging.ClearProviders();
+        builder.Logging.AddSimpleConsole(o => { o.SingleLine = true; o.TimestampFormat = "HH:mm:ss "; });
+
+        // DI: queue, registry, worker, handlers
+        builder.Services.AddSingleton<IIntentQueue, InMemoryPriorityQueue>();
+        builder.Services.AddSingleton<IHandlerRegistry, HandlerRegistry>();
+        builder.Services.AddSingleton<IIntentHandler, NlpMatchHandler>(); // register "nlp.match"
+        builder.Services.AddHostedService<DispatcherWorker>();
+
+        var app = builder.Build();
+
+        app.MapGet("/health", () => Results.Json(new { status = "ok" }));
+
+        app.MapPost("/intents", async (HttpRequest http, IntentRequest req, IIntentQueue queue, IHandlerRegistry reg) =>
+        {
+            // 1) API key check
+            var configuredKey = app.Configuration["DANSBY_API_KEY"];
+            if (string.IsNullOrEmpty(configuredKey) ||
+                !http.Headers.TryGetValue("X-Api-Key", out var key) ||
+                key != configuredKey)
+            {
+                return Results.Unauthorized();
+            }
+
+            // 2) Basic validation
+            if (string.IsNullOrWhiteSpace(req.Intent))
+                return Results.BadRequest(new { error = "intent required" });
+
+            // (Optional) As of now, rejecting unknown intents early instead of dropping later
+            if (reg.Resolve(req.Intent.Trim()) is null)
+                return Results.BadRequest(new { error = $"unknown intent '{req.Intent}'" });
+
+            // 3) Build envelope and enqueue
+            var env = new Envelope(
+                Id: Guid.NewGuid().ToString(),
+                Ts: DateTimeOffset.UtcNow,
+                Intent: req.Intent.Trim(),
+                Priority: Math.Clamp(req.Priority ?? 5, 0, 9),
+                CorrelationId: string.IsNullOrWhiteSpace(req.CorrelationId) ? Guid.NewGuid().ToString() : req.CorrelationId!,
+                Payload: req.Payload.ValueKind == JsonValueKind.Undefined ? JsonDocument.Parse("{}").RootElement : req.Payload
+            );
+
+            queue.Enqueue(env);
+            return Results.Json(new { accepted = true, id = env.Id, correlationId = env.CorrelationId });
+        });
+
+        app.Run();
     }
-
-    // 2) Basic validation
-    if (string.IsNullOrWhiteSpace(req.Intent))
-        return Results.BadRequest(new { error = "intent required" });
-
-    // (Optional) As of now, rejecting unknown intents early instead of dropping later
-    if (reg.Resolve(req.Intent.Trim()) is null)
-        return Results.BadRequest(new { error = $"unknown intent '{req.Intent}'" });
-
-    // 3) Build envelope and enqueue
-    var env = new Envelope(
-        Id: Guid.NewGuid().ToString(),
-        Ts: DateTimeOffset.UtcNow,
-        Intent: req.Intent.Trim(),
-        Priority: Math.Clamp(req.Priority ?? 5, 0, 9),
-        CorrelationId: string.IsNullOrWhiteSpace(req.CorrelationId) ? Guid.NewGuid().ToString() : req.CorrelationId!,
-        Payload: req.Payload.ValueKind == JsonValueKind.Undefined ? JsonDocument.Parse("{}").RootElement : req.Payload
-    );
-
-    queue.Enqueue(env);
-    return Results.Json(new { accepted = true, id = env.Id, correlationId = env.CorrelationId });
-});
-
-app.Run("http://localhost:8087");
+}
 
 // ---- Models & Services ----
 record IntentRequest(string Intent, int? Priority, string? CorrelationId, JsonElement Payload);
