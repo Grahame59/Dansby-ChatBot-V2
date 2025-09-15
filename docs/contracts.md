@@ -1,5 +1,5 @@
 ---
-title: Dansby v2 Contracts
+title: Dansby v2.0.0 Contracts
 date: 2025-09-08
 ---
 

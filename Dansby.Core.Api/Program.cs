@@ -11,16 +11,33 @@ internal class Program
         builder.Logging.ClearProviders();
         builder.Logging.AddSimpleConsole(o => { o.SingleLine = true; o.TimestampFormat = "HH:mm:ss "; });
 
-        // DI: queue, registry, worker, handlers
+        // Dependency Injection: queue, registry, worker, handlers
         builder.Services.AddSingleton<IIntentQueue, InMemoryPriorityQueue>();
         builder.Services.AddSingleton<IHandlerRegistry, HandlerRegistry>();
-        builder.Services.AddSingleton<IIntentHandler, NlpMatchHandler>(); // register "nlp.match"
+
+            // v1.1 recognizer wired into v2
+            builder.Services.AddSingleton<Pipes.Nlp.Mapping.V1Tokenizer>();
+            builder.Services.AddSingleton<Pipes.Nlp.Mapping.V1RecognizerEngine>();
+            builder.Services.AddSingleton<Pipes.Nlp.Mapping.ITextRecognizer, Pipes.Nlp.Mapping.V1RecognizerAdapter>();
+            builder.Services.AddSingleton<IIntentHandler, Pipes.Nlp.Mapping.NlpRecognizeHandler>();
+
         builder.Services.AddHostedService<DispatcherWorker>();
 
         var app = builder.Build();
 
         app.MapGet("/health", () => Results.Json(new { status = "ok" }));
 
+        /// <summary>
+        /// This /intents endpoint: 
+        /// 
+        ///     - Checks the API key (Currently: superlongrandomvalue123) 
+        ///     - Validates the intent name exists
+        ///     - Normalizes data and builds an Envelope
+        ///     - Enqueues the Envelope onto the priority queue
+        ///     - Returns immediately (202/200) to the client
+        /// 
+        /// </summary>
+        
         app.MapPost("/intents", async (HttpRequest http, IntentRequest req, IIntentQueue queue, IHandlerRegistry reg) =>
         {
             // 1) API key check
@@ -99,6 +116,15 @@ sealed class HandlerRegistry : IHandlerRegistry
     public IIntentHandler? Resolve(string intent) => _map.TryGetValue(intent, out var h) ? h : null;
 }
 
+/// <summary>
+/// The DispatcherWorker Class:
+/// 
+///     - Loops, pops an Envelope off the queue
+///     - Finds the right handler by the envelope’s Intent via HandlerRegistry
+///     - Calls the handler’s HandleAsync(payload, correlationId, ct)
+///     - Logs success or error
+/// 
+/// </summary>
 sealed class DispatcherWorker : BackgroundService
 {
     private readonly IIntentQueue _queue;

@@ -1,5 +1,5 @@
 ---
-title: Dansby v2 Architecture (MVP)
+title: Dansby v2.0.0 Architecture (MVP)
 date: 2025-09-08
 ---
 

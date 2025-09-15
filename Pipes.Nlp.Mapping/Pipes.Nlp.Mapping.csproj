@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dansby.Shared\Dansby.Shared.csproj" />
+    <None Include="intent_mappings.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <PropertyGroup>
