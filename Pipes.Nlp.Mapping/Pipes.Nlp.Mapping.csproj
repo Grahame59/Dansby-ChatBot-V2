@@ -20,6 +20,6 @@
   <ItemGroup>
     <None Include="intent_mappings.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  
 </Project>
 
-</Project>
