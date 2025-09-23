@@ -120,12 +120,6 @@ internal class Program
 // ---- Models & Services ----
 record IntentRequest(string Intent, int? Priority, string? CorrelationId, JsonElement Payload);
 
-interface IIntentQueue
-{
-    void Enqueue(Envelope env);
-    bool TryDequeue(out Envelope? env);
-}
-
 sealed class InMemoryPriorityQueue : IIntentQueue
 {
     private readonly ConcurrentQueue<Envelope>[] _qs =
