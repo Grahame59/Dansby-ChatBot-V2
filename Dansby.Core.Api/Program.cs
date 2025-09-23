@@ -111,7 +111,7 @@ internal class Program
             queue.Enqueue(env);
             return Results.Json(new { accepted = true, id = env.Id, correlationId = env.CorrelationId });
         })
-        .RequireRateLimiting(intents);
+        .RequireRateLimiting("intents");
 
         app.Run();
     }
