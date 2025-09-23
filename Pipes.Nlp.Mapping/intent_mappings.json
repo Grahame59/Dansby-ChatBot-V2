@@ -61,6 +61,69 @@
         ]
       },
       {
+        "Utterance": "hello dansby",
+        "Tokens": [
+          "hello",
+          "dansby"
+        ]
+      },
+      {
+        "Utterance": "hi dansby",
+        "Tokens": [
+          "hi",
+          "dansby"
+        ]
+      },
+      {
+        "Utterance": "hey dansby",
+        "Tokens": [
+          "hey",
+          "dansby"
+        ]
+      },
+      {
+        "Utterance": "hola dansby",
+        "Tokens": [
+          "hola",
+          "dansby"
+        ]
+      },
+      {
+        "Utterance": "bonjour dansby",
+        "Tokens": [
+          "bonjour",
+          "dansby"
+        ]
+      },
+      {
+        "Utterance": "yo dansby",
+        "Tokens": [
+          "yo",
+          "dansby"
+        ]
+      },
+      {
+        "Utterance": "yooo dansby",
+        "Tokens": [
+          "yooo",
+          "dansby"
+        ]
+      },
+      {
+        "Utterance": "ayooo dansby",
+        "Tokens": [
+          "ayooo",
+          "dansby"
+        ]
+      },
+      {
+        "Utterance": "howdy dansby",
+        "Tokens": [
+          "howdy",
+          "dansby"
+        ]
+      },
+      {
         "Utterance": "hello buddy",
         "Tokens": [
           "hello",
