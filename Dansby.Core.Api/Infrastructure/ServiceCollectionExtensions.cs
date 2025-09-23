@@ -4,9 +4,6 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Dansby.Shared;
-{
-    
-}
 
 namespace Dansby.Core.Api.Infrastructure;
 
