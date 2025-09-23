@@ -19,8 +19,13 @@ internal class Program
             builder.Services.AddSingleton<Pipes.Nlp.Mapping.V1Tokenizer>();
             builder.Services.AddSingleton<Pipes.Nlp.Mapping.V1RecognizerEngine>();
             builder.Services.AddSingleton<Pipes.Nlp.Mapping.ITextRecognizer, Pipes.Nlp.Mapping.V1RecognizerAdapter>();
-            builder.Services.AddSingleton<IIntentHandler, Pipes.Nlp.Mapping.NlpRecognizeHandler>();
 
+        // Auto-Registry for Handlers
+        builder.Services.AddAllIntentHandlersFrom
+        (
+            typeof(Pipes.Nlp.Mapping.NlpRecognizeHandler).Assembly
+            // add more assemblies as more modules are added
+        );
         builder.Services.AddHostedService<DispatcherWorker>();
 
         var app = builder.Build();
