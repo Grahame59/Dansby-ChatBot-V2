@@ -79,7 +79,7 @@ internal class Program
         /// 
         /// </summary>
 
-        app.MapPost("/intents", async (HttpRequest http, IntentRequest req, IIntentQueue queue, IHandlerRegistry reg) =>
+        app.MapPost("/intents", (HttpRequest http, IntentRequest req, IIntentQueue queue, IHandlerRegistry reg) =>
         {
             // 1) API key check
             var configuredKey = app.Configuration["DANSBY_API_KEY"];
