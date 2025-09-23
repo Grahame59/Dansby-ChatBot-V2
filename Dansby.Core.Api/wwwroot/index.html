@@ -1,0 +1,18 @@
+<!doctype html><meta charset="utf-8"><title>Dansby Console</title>
+<style>body{font-family:system-ui;margin:2rem;max-width:720px}pre{background:#111;color:#eee;padding:1rem;border-radius:8px;white-space:pre-wrap}</style>
+<h1>Dansby Console</h1>
+<input id="apiKey" placeholder="X-Api-Key" style="width:100%"><br><br>
+<textarea id="text" rows="3" style="width:100%"></textarea><br>
+<button id="rec">Recognize</button> <button id="route">Route</button>
+<pre id="out"></pre>
+
+<script>
+    const val=id=>document.getElementById(id).value.trim();
+    const out=t=>document.getElementById('out').textContent=t;
+    async function post(url,body){
+        const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-Api-Key':val('apiKey')},body:JSON.stringify(body)});
+        out(await r.text());
+    }
+    document.getElementById('rec').onclick=()=>post('/debug/recognize',{text:val('text')});
+    document.getElementById('route').onclick=()=>post('/intents',{intent:'nlp.route',payload:{text:val('text')}});
+</script>

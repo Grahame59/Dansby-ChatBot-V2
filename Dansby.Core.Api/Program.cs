@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using Dansby.Shared;
 using Pipes.Nlp.Mapping;
+using Microsoft.AspNetCore.RateLimiting;
 
 internal class Program
 {
@@ -15,20 +16,54 @@ internal class Program
         builder.Services.AddSingleton<IIntentQueue, InMemoryPriorityQueue>();
         builder.Services.AddSingleton<IHandlerRegistry, HandlerRegistry>();
 
-            // v1.1 recognizer wired into v2
-            builder.Services.AddSingleton<Pipes.Nlp.Mapping.V1Tokenizer>();
-            builder.Services.AddSingleton<Pipes.Nlp.Mapping.V1RecognizerEngine>();
-            builder.Services.AddSingleton<Pipes.Nlp.Mapping.ITextRecognizer, Pipes.Nlp.Mapping.V1RecognizerAdapter>();
+        // v1.1 recognizer wired into v2
+        builder.Services.AddSingleton<Pipes.Nlp.Mapping.V1Tokenizer>();
+        builder.Services.AddSingleton<Pipes.Nlp.Mapping.V1RecognizerEngine>();
+        builder.Services.AddSingleton<Pipes.Nlp.Mapping.ITextRecognizer, Pipes.Nlp.Mapping.V1RecognizerAdapter>();
 
         // Auto-Registry for Handlers
         builder.Services.AddAllIntentHandlersFrom
         (
             typeof(Pipes.Nlp.Mapping.NlpRecognizeHandler).Assembly
-            // add more assemblies as more modules are added
+        // add more assemblies as more modules are added
         );
         builder.Services.AddHostedService<DispatcherWorker>();
 
+        // Enable Static Files + CORS 
+        builder.Services.AddCors(o => o.AddPolicy("ui", p => p
+        .AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod()));
+
+        builder.Services.AddRateLimiter(_ => _
+        .AddFixedWindowLimiter("intents", o =>
+        {
+            o.PermitLimit = 20;                // up to 20 requests
+            o.Window = TimeSpan.FromSeconds(10); // per 10 seconds
+        }));
+
         var app = builder.Build();
+
+        // Tiny Web Console (LAN-Friendly)
+        app.UseCors("ui");
+        app.UseDefaultFiles();  // serves index.html automatically if present
+        app.UseStaticFiles();   // serves files from wwwroot
+        app.UseRateLimiter();
+
+        app.MapPost("/debug/recognize", (HttpRequest http, Pipes.Nlp.Mapping.ITextRecognizer rec, JsonElement body) =>
+        {
+            var configuredKey = app.Configuration["DANSBY_API_KEY"];
+            if (string.IsNullOrEmpty(configuredKey) ||
+                !http.Headers.TryGetValue("X-Api-Key", out var key) || key != configuredKey)
+                return Results.Unauthorized();
+
+            if (!body.TryGetProperty("text", out var t) || t.ValueKind != JsonValueKind.String)
+                return Results.BadRequest(new { error = "body.text (string) required" });
+
+            var (intent, score, slots, domain) = rec.Recognize(t.GetString() ?? "");
+            return Results.Json(new { intent, score, domain, slots });
+        })
+        .RequireRateLimiting("intents"); 
 
         app.MapGet("/health", () => Results.Json(new { status = "ok" }));
 
@@ -42,7 +77,7 @@ internal class Program
         ///     - Returns immediately (202/200) to the client
         /// 
         /// </summary>
-        
+
         app.MapPost("/intents", async (HttpRequest http, IntentRequest req, IIntentQueue queue, IHandlerRegistry reg) =>
         {
             // 1) API key check
@@ -74,7 +109,8 @@ internal class Program
 
             queue.Enqueue(env);
             return Results.Json(new { accepted = true, id = env.Id, correlationId = env.CorrelationId });
-        });
+        })
+        .RequireRateLimiting(intents);
 
         app.Run();
     }
@@ -91,7 +127,8 @@ interface IIntentQueue
 
 sealed class InMemoryPriorityQueue : IIntentQueue
 {
-    private readonly ConcurrentQueue<Envelope>[] _qs = Enumerable.Range(0, 10).Select(_ => new ConcurrentQueue<Envelope>()).ToArray();
+    private readonly ConcurrentQueue<Envelope>[] _qs =
+        Enumerable.Range(0, 10).Select(_ => new ConcurrentQueue<Envelope>()).ToArray();
 
     public void Enqueue(Envelope env) => _qs[env.Priority].Enqueue(env);
 
@@ -102,6 +139,9 @@ sealed class InMemoryPriorityQueue : IIntentQueue
             if (_qs[p].TryDequeue(out var e)) { env = e; return true; }
         env = null; return false;
     }
+
+    public int[] CountByPriority() => _qs.Select(q => q.Count).ToArray();
+    public int TotalCount => _qs.Sum(q => q.Count);
 }
 
 interface IHandlerRegistry
