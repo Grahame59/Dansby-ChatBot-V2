@@ -85,6 +85,43 @@ internal class Program
         app.UseStaticFiles();   // serves files from wwwroot
         app.UseRateLimiter();
 
+        // sync debug endpoint that does the full path inline (recognize → pick reply → return it)
+        app.MapPost("/debug/respond", async (
+            HttpRequest http,
+            Pipes.Nlp.Mapping.ITextRecognizer rec,
+            IHandlerRegistry reg,
+            JsonElement body,
+            CancellationToken ct) =>
+        {
+            var configuredKey = app.Configuration["DANSBY_API_KEY"];
+            if (string.IsNullOrEmpty(configuredKey) ||
+                !http.Headers.TryGetValue("X-Api-Key", out var key) || key != configuredKey)
+                return Results.Unauthorized();
+
+            if (!body.TryGetProperty("text", out var t) || t.ValueKind != JsonValueKind.String)
+                return Results.BadRequest(new { error = "body.text (string) required" });
+
+            var text = t.GetString() ?? "";
+            var (intent, _, _, _) = rec.Recognize(text);
+
+            var handler = reg.Resolve(intent);
+            if (handler is null)
+                return Results.BadRequest(new { error = $"no handler for recognized intent '{intent}'" });
+
+            // Call the handler directly (no queue); pass text so ReplyHandler can format/use it later if needed
+            var payload = JsonSerializer.Deserialize<JsonElement>(JsonSerializer.Serialize(new { text }));
+            var corr = Guid.NewGuid().ToString();
+
+            var res = await handler.HandleAsync(payload, corr, ct);
+
+            if (!res.Ok)
+                return Results.BadRequest(new { error = res.ErrorCode, message = res.Message, intent });
+
+            // ReplyHandler returns { intent, reply }; we just forward res.Data so the console can extract it.
+            return Results.Json(new { intent, result = res.Data });
+        })
+        .RequireRateLimiting("intents");
+
         // Hot-Reload Endpoint for Responses
         app.MapPost("/responses/reload", async (HttpRequest http, Pipes.Nlp.Mapping.Responses.IResponseMap map) =>
         {

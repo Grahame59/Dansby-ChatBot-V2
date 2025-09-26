@@ -154,14 +154,7 @@
   // Your existing route (fire the router; shows raw response)
   el('route').onclick = () => post('/intents', { intent: 'nlp.route', payload: { text: val('text') } });
 
-  // New: Respond (route + extract a human-friendly reply)
-  el('respond').onclick = async () => 
-  {
-    // Same call as Route; we just prettify/extract the reply afterwards.
-    // If you prefer to differentiate on the server, you can add a hint like mode:'reply'.
-    return post('/intents', {
-      intent: 'nlp.route',
-      payload: { text: val('text'), mode: 'reply' }
-    });
-  };
+  // Respond (extract a human-friendly reply)
+  el('respond').onclick = () => post('/debug/respond', { text: val('text') });
+  
 </script>
