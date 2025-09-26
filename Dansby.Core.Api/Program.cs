@@ -46,7 +46,8 @@ internal class Program
         // Responses JSON map
         builder.Services.AddSingleton<Pipes.Nlp.Mapping.Responses.IResponseMap>(sp =>
         {
-            var path = Path.Combine(AppContext.BaseDirectory, "response_mappings.json"); // repo root copy works because app base dir points to bin folder that contains a copy—ensure file is copied on build or use absolute path here.
+            var env = sp.GetRequiredService<IHostEnvironment>();
+            var path = Path.Combine(env.ContentRootPath, "response_mappings.json");
             return new Pipes.Nlp.Mapping.Responses.ResponseMap(path);
         });
 

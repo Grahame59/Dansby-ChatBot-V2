@@ -19,7 +19,6 @@
   <!-- Ensure intent_mappings.json is deployed next to the binary -->
   <ItemGroup>
     <None Include="intent_mappings.json" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="response_mappings.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   
 </Project>

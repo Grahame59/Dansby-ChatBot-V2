@@ -5,6 +5,8 @@ using Pipes.Nlp.Mapping.Responses;
 
 namespace Pipes.Nlp.Mapping;
 
+[ManualRegistration]  //ManualRegistrationAttribute.cs (Need this so it doesn't get scanned by AddAllIntentHandlersFrom(...), 
+                      // Since ReplyHandler needs a string handledIntent in its ctor, it would throw an error.)
 public sealed class ReplyHandler : IIntentHandler
 {
     public string Name { get; }
@@ -41,10 +43,10 @@ public sealed class ReplyHandler : IIntentHandler
         {
             reply = Name.ToLowerInvariant() switch
             {
-                "sys.time.now"       => $"The time is {DateTime.Now:h:mm tt}.",
-                "sys.date.today"     => $"Today is {DateTime.Now:yyyy-MM-dd}.",
+                "sys.time.now" => $"The time is {DateTime.Now:h:mm tt}.",
+                "sys.date.today" => $"Today is {DateTime.Now:yyyy-MM-dd}.",
                 "sys.time.dayofweek" => $"It's {DateTime.Now:dddd}.",
-                _                    => "I'm not sure how to respond to that."
+                _ => "I'm not sure how to respond to that."
             };
         }
 

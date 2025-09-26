@@ -12,10 +12,17 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAllIntentHandlersFrom(
         this IServiceCollection services, params Assembly[] asms)
     {
-        var t = typeof(Dansby.Shared.IIntentHandler); // Referencing the interface in shared
+        var handlerType = typeof(IIntentHandler); // Referencing the interface in shared
+        var manualAttr  = typeof(ManualRegistrationAttribute);
+
         foreach (var asm in asms)
-        foreach (var type in asm.GetTypes().Where(x => t.IsAssignableFrom(x) && !x.IsAbstract && !x.IsInterface))
+        foreach (var type in asm.GetTypes().Where(x => handlerType.IsAssignableFrom(x) && !x.IsAbstract && !x.IsInterface))
+        {
+            if (type.GetCustomAttribute(manualAttr) != null)
+                continue; // skip: we’ll register these manually (e.g., ReplyHandler instances)
+
             services.AddSingleton(typeof(IIntentHandler), type);
+        }
         return services;
     }
 }

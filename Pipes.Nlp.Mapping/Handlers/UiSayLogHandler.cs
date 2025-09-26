@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Pipes.Nlp.Mapping;
 
+[ManualRegistration]
 public sealed class UiSayLogHandler : IIntentHandler
 {
     public string Name => "ui.out.say";
