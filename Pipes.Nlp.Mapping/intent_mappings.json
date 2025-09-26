@@ -917,6 +917,25 @@
           "today",
           "the"
         ]
+      },
+      {
+        "Utterance": "what is todays date?",
+        "Tokens": [
+          "whats",
+          "is",
+          "todays",
+          "date"
+        ]
+      },
+      {
+        "Utterance": "what date is it today",
+        "Tokens": [
+          "what",
+          "date",
+          "is",
+          "it",
+          "today"
+        ]
       }
     ]
   },
