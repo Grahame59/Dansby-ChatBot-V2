@@ -1,18 +1,167 @@
-<!doctype html><meta charset="utf-8"><title>Dansby Console</title>
-<style>body{font-family:system-ui;margin:2rem;max-width:720px}pre{background:#111;color:#eee;padding:1rem;border-radius:8px;white-space:pre-wrap}</style>
-<h1>Dansby Console</h1>
-<input id="apiKey" placeholder="X-Api-Key" style="width:100%"><br><br>
-<textarea id="text" rows="3" style="width:100%"></textarea><br>
-<button id="rec">Recognize</button> <button id="route">Route</button>
-<pre id="out"></pre>
+<!-- index.html -->
+<!-- LAN-hosted test console for Dansby routing & replies -->
+
+<!doctype html>
+<meta charset="utf-8">
+<title>Dansby Console</title>
+<style>
+  body { font-family: system-ui; margin: 2rem; max-width: 720px }
+  pre { background: #111; color: #eee; padding: 1rem; border-radius: 8px; white-space: pre-wrap }
+  .row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .5rem }
+  .row > * { flex: 1 0 auto }
+  .reply { padding:.75rem 1rem; border:1px solid #ddd; border-radius:8px; background:#f9f9f9; margin:.5rem 0 }
+  .muted { opacity:.7; font-size:.9em }
+</style>
+
+<h1>Dansby V2.0.0 Console</h1>
+
+<input id = "apiKey" placeholder = "X-Api-Key" style = "width:100%"><br><br>
+<textarea id = "text" rows = "3" style = "width:100%"></textarea>
+
+<div class = "row">
+  <button id = "rec">Recognize</button>
+  <button id = "route">Route</button>
+  <button id = "respond">Respond</button>
+</div>
+
+<div id = "prettyReply" class = "reply" style = "display:none"></div>
+<div class = "muted" id = "rawLabel" style = "display:none">Raw response</div>
+<pre id = "out"></pre>
 
 <script>
-    const val=id=>document.getElementById(id).value.trim();
-    const out=t=>document.getElementById('out').textContent=t;
-    async function post(url,body){
-        const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-Api-Key':val('apiKey')},body:JSON.stringify(body)});
-        out(await r.text());
+  const el = id => document.getElementById(id);
+  const val = id => el(id).value.trim();
+
+  // Best-effort extractor for a "reply" or "message" from various shapes.
+  function extractReply(obj) 
+  {
+    if (!obj || typeof obj !== 'object') return '';
+
+    // Common shapes to try, in order:
+    // 1) { reply: "..." } or { text: "..." }
+    if (typeof obj.reply === 'string') return obj.reply;
+    if (typeof obj.text === 'string') return obj.text;
+    if (typeof obj.message === 'string') return obj.message;
+
+    // 2) envelope-ish: { result: { reply/text/... } }
+    if (obj.result) 
+    {
+      const r = extractReply(obj.result);
+      if (r) return r;
     }
-    document.getElementById('rec').onclick=()=>post('/debug/recognize',{text:val('text')});
-    document.getElementById('route').onclick=()=>post('/intents',{intent:'nlp.route',payload:{text:val('text')}});
+
+    // 3) pipelines/handlers: { outputs: [{ text: ... }]} or { messages: [{ text: ... }]}
+    const arrays = ['outputs','messages','items','steps'];
+    for (const key of arrays) 
+    {
+      if (Array.isArray(obj[key])) 
+      {
+        for (const item of obj[key]) 
+        {
+          const r = extractReply(item);
+          if (r) return r;
+        }
+      }
+    }
+
+    // 4) nested payloads: { data: {...} } / { payload: {...} }
+    if (obj.data) 
+    {
+      const r = extractReply(obj.data);
+      if (r) return r;
+    }
+    if (obj.payload) 
+    {
+      const r = extractReply(obj.payload);
+      if (r) return r;
+    }
+
+    // 5) content-like: { content: "..." } or { content: [{ text: "..." }] }
+    if (typeof obj.content === 'string') return obj.content;
+    if (Array.isArray(obj.content)) 
+    {
+      for (const c of obj.content) 
+      {
+        const r = extractReply(c);
+        if (r) return r;
+      }
+    }
+
+    return '';
+  }
+
+  function showRaw(text) 
+  {
+    el('out').textContent = text;
+    el('rawLabel').style.display = text ? '' : 'none';
+  }
+
+  function showReply(reply) 
+  {
+    const box = el('prettyReply');
+    if (reply) 
+    {
+      box.textContent = reply;
+      box.style.display = '';
+    } else 
+    {
+      box.style.display = 'none';
+      box.textContent = '';
+    }
+  }
+
+  async function post(url, body) 
+  {
+    showReply('');
+    showRaw(''); // clear
+    try 
+    {
+      const r = await fetch(url, 
+      {
+        method: 'POST',
+        headers: 
+        {
+          'Content-Type': 'application/json',
+          'X-Api-Key': val('apiKey')
+        },
+        body: JSON.stringify(body)
+      });
+
+      const text = await r.text();
+
+      // Try JSON first
+      try 
+      {
+        const json = JSON.parse(text);
+        const reply = extractReply(json);
+        if (reply) showReply(reply);
+        showRaw(JSON.stringify(json, null, 2));
+      } catch 
+      {
+        // Not JSON — just show as text
+        showRaw(text || '(empty response)');
+      }
+    } catch (e) 
+    {
+      showReply('');
+      showRaw('Request failed: ' + (e?.message || e));
+    }
+  }
+
+  // Buttons
+  el('rec').onclick   = () => post('/debug/recognize', { text: val('text') });
+
+  // Your existing route (fire the router; shows raw response)
+  el('route').onclick = () => post('/intents', { intent: 'nlp.route', payload: { text: val('text') } });
+
+  // New: Respond (route + extract a human-friendly reply)
+  el('respond').onclick = async () => 
+  {
+    // Same call as Route; we just prettify/extract the reply afterwards.
+    // If you prefer to differentiate on the server, you can add a hint like mode:'reply'.
+    return post('/intents', {
+      intent: 'nlp.route',
+      payload: { text: val('text'), mode: 'reply' }
+    });
+  };
 </script>
