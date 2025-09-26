@@ -43,6 +43,39 @@ internal class Program
             o.Window = TimeSpan.FromSeconds(10); // per 10 seconds
         }));
 
+        // Responses JSON map
+        builder.Services.AddSingleton<Pipes.Nlp.Mapping.Responses.IResponseMap>(sp =>
+        {
+            var path = Path.Combine(AppContext.BaseDirectory, "response_mappings.json"); // repo root copy works because app base dir points to bin folder that contains a copy—ensure file is copied on build or use absolute path here.
+            return new Pipes.Nlp.Mapping.Responses.ResponseMap(path);
+        });
+
+        // Lightweight sink for "ui.out.say"
+        builder.Services.AddSingleton<Dansby.Shared.IIntentHandler, Pipes.Nlp.Mapping.UiSayLogHandler>();
+
+        // Register one ReplyHandler per canonical intent (instances with different Names)
+        string[] replyIntents =
+        {
+            "chat.greet","chat.goodbye","chat.help","chat.howareyou","chat.currenttask",
+            "chat.creator.name","chat.favorites.color","chat.thanks",
+            "chat.affection.compliment","chat.affection.love","chat.affection.missyou",
+            "chat.name.called","chat.name.misspelling","fun.easteregg.steven",
+            "weather.current","weather.current.temp",
+            "sys.time.now","sys.date.today","sys.time.dayofweek"
+        };
+
+        foreach (var intent in replyIntents)
+        {
+            builder.Services.AddSingleton<Dansby.Shared.IIntentHandler>(sp =>
+                new Pipes.Nlp.Mapping.ReplyHandler(
+                    handledIntent: intent,
+                    responses: sp.GetRequiredService<Pipes.Nlp.Mapping.Responses.IResponseMap>(),
+                    queue:     sp.GetRequiredService<IIntentQueue>(),
+                    log:       sp.GetRequiredService<ILogger<Pipes.Nlp.Mapping.ReplyHandler>>()
+                )
+            );
+        }
+
         var app = builder.Build();
 
         // Tiny Web Console (LAN-Friendly)
@@ -50,6 +83,19 @@ internal class Program
         app.UseDefaultFiles();  // serves index.html automatically if present
         app.UseStaticFiles();   // serves files from wwwroot
         app.UseRateLimiter();
+
+        // Hot-Reload Endpoint for Responses
+        app.MapPost("/responses/reload", async (HttpRequest http, Pipes.Nlp.Mapping.Responses.IResponseMap map) =>
+        {
+            var configuredKey = app.Configuration["DANSBY_API_KEY"];
+            if (string.IsNullOrEmpty(configuredKey) ||
+                !http.Headers.TryGetValue("X-Api-Key", out var key) || key != configuredKey)
+                return Results.Unauthorized();
+
+            await map.ReloadAsync();
+            return Results.Json(new { reloaded = true });
+        })
+        .RequireRateLimiting("intents");
 
         app.MapPost("/debug/recognize", (HttpRequest http, Pipes.Nlp.Mapping.ITextRecognizer rec, JsonElement body) =>
         {

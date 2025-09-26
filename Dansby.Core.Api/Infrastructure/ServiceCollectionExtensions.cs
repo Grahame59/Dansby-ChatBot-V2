@@ -1,4 +1,4 @@
-// ServiceCollectionExtensions.cs
+// Infrastructure/ServiceCollectionExtensions.cs
 // This script auto-registers all handlers (This will help keep Program.cs smaller)
 
 using System.Reflection;
