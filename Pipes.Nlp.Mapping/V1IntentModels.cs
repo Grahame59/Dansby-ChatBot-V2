@@ -27,5 +27,5 @@ public sealed class ExampleDef
 
     // Keep for backward-compat, but we’ll recompute anyway
     [JsonPropertyName("tokens")]
-    public List<string>? Tokens { get; set; }
+    public IReadOnlyList<string>? Tokens { get; set; }
 }
