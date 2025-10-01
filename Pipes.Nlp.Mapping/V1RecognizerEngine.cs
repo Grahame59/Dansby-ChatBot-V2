@@ -6,11 +6,11 @@ namespace Pipes.Nlp.Mapping;
 public sealed class V1RecognizerEngine
 {
     private readonly ILogger<V1RecognizerEngine> _log;
-    private readonly V1Tokenizer _tokenizer;
+    private readonly ITokenizer _tokenizer;                    // CHANGED to interface
     private List<IntentDef> _intents = new();
-    private readonly double _threshold = 0.65; // same as I had v1.1 default for Jaccard 
+    private readonly double _threshold = 0.35;                 // LOWER after stopwording
 
-    public V1RecognizerEngine(ILogger<V1RecognizerEngine> log, V1Tokenizer tokenizer)
+    public V1RecognizerEngine(ILogger<V1RecognizerEngine> log, ITokenizer tokenizer)
     {
         _log = log;
         _tokenizer = tokenizer;
@@ -32,12 +32,15 @@ public sealed class V1RecognizerEngine
             var intents = JsonSerializer.Deserialize<List<IntentDef>>(json, opts) ?? new();
 
             foreach (var intent in intents)
-            foreach (var ex in intent.Examples)
-                if (ex.Tokens is null || ex.Tokens.Count == 0)
-                    ex.Tokens = _tokenizer.Tokenize(ex.Utterance);
+            {
+                // Always recompute example tokens (ignore tokens in JSON)
+                foreach (var ex in intent.Examples)
+                    ex.Tokens = _tokenizer.Tokenize(ex.Utterance, filterStopWords: true);
+            }
 
             _intents = intents;
-            _log.LogInformation("Loaded {Count} intents from {Path}", _intents.Count, path);
+            _log.LogInformation("Loaded {Count} intents (active: {Active}) from {Path}",
+                _intents.Count, _intents.Count(i => !i.Deprecated), path);
         }
         catch (Exception ex)
         {
@@ -50,13 +53,13 @@ public sealed class V1RecognizerEngine
     {
         if (string.IsNullOrWhiteSpace(userInput)) return ("unknown", 0.0);
 
-        var userTokens = _tokenizer.Tokenize(userInput);
+        var userTokens = _tokenizer.Tokenize(userInput, filterStopWords: true);
         var userSet = userTokens.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         string best = "unknown";
         double bestScore = 0.0;
 
-        foreach (var intent in _intents)
+        foreach (var intent in _intents.Where(i => !i.Deprecated))
         {
             foreach (var ex in intent.Examples)
             {
@@ -68,7 +71,7 @@ public sealed class V1RecognizerEngine
             }
         }
 
-        if (bestScore >= _threshold) return (best, Math.Round(bestScore, 3));
-        return ("unknown", Math.Round(bestScore, 3));
+        bestScore = Math.Round(bestScore, 3);
+        return bestScore >= _threshold ? (best, bestScore) : ("unknown", bestScore);
     }
 }

@@ -12,6 +12,12 @@ public sealed class IntentDef
 
     [JsonPropertyName("tags")]
     public List<string>? Tags { get; set; }
+
+    [JsonPropertyName("aliases")]
+    public List<string> Aliases { get; set; } = new();     
+
+    [JsonPropertyName("deprecated")]
+    public bool Deprecated { get; set; }                   
 }
 
 public sealed class ExampleDef
@@ -19,6 +25,7 @@ public sealed class ExampleDef
     [JsonPropertyName("utterance")]
     public string Utterance { get; set; } = "";
 
+    // Keep for backward-compat, but we’ll recompute anyway
     [JsonPropertyName("tokens")]
     public List<string>? Tokens { get; set; }
 }

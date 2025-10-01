@@ -55,55 +55,66 @@ public sealed class V1RecognizerAdapter : ITextRecognizer
     }
 
     // Runtime Normalization for the old intent_mappings.json name conventions from V1.1
-    // (Optional): I should rename them all to these for cleanliness later on in the json
     private static readonly Dictionary<string, string> Aliases = new(StringComparer.OrdinalIgnoreCase)
     {
-        // Chat
-        { "chat.greet", "chat.greet" }, // already canonical
-        { "greeting", "chat.greet" },
-        { "goodbye", "chat.goodbye" },
-        { "help", "chat.help" },
+        // Canonical pass-throughs
+        { "chat.greet", "chat.greet" },
+        { "chat.farewell", "chat.farewell" },
+        { "chat.help", "chat.help" },
+        { "chat.howareyou", "chat.howareyou" },
+        { "chat.apology", "chat.apology" },
+        { "chat.love", "chat.love" },
+        { "chat.compliment", "chat.compliment" },
+        { "chat.thanks.reply", "chat.thanks.reply" },
+        { "chat.missedyou.reply", "chat.missedyou.reply" },
+        { "chat.name.asked", "chat.name.asked" },
+        { "chat.name.confirm", "chat.name.confirm" },
+        { "chat.name.spelling", "chat.name.spelling" },
+
+        { "sys.status.current", "sys.status.current" },
+        { "sys.status.listallfunctions", "sys.status.listallfunctions" },
+        { "sys.meta.creator", "sys.meta.creator" },
+        { "sys.meta.favoritecolor", "sys.meta.favoritecolor" },
+        { "sys.time.now", "sys.time.now" },
+        { "sys.time.date", "sys.time.date" },
+        { "sys.time.dayofweek", "sys.time.dayofweek" },
+        { "weather.forecast", "weather.forecast" },
+        { "weather.temperature", "weather.temperature" },
+        { "fun.easteregg.steven", "fun.easteregg.steven" },
+
+        // Legacy → Canonical
+        { "greetings", "chat.greet" },
+        { "goodbye", "chat.farewell" },
         { "howareyou", "chat.howareyou" },
-        { "currenttask", "chat.currenttask" },
-        { "usercurrenttaskcodingondansby", "chat.currenttask" },
-        { "whoiscreatorname", "chat.creator.name" },
-        { "creatorname", "chat.creator.name" },
-        { "dansbyfavcolor", "chat.favorites.color" },
-        { "userthankyou", "chat.thanks" },
-        { "complimentaffection", "chat.affection.compliment" },
-        { "loveaffection", "chat.affection.love" },
-        { "usermissedyou", "chat.affection.missyou" },
-        { "calledname", "chat.name.called" },
-        { "callednamespeltwrong", "chat.name.misspelling" },
-        { "apology", "chat.apology" },
-        { "steveneasteregg", "fun.easteregg.steven" },
+        { "currenttask", "sys.status.current" },
+        { "usercurrenttaskcodingondansby", "sys.status.current" },
+        { "whoiscreatorname", "sys.meta.creator" },
+        { "creatorname", "sys.meta.creator" },
+        { "dansbyfavcolor", "sys.meta.favoritecolor" },
+        { "userthankyou", "chat.thanks.reply" },
+        { "complimentaffection", "chat.compliment" },
+        { "loveaffection", "chat.love" },
+        { "usermissedyou", "chat.missedyou.reply" },
+        { "calledname", "chat.name.confirm" },
+        { "callednamespeltwrong", "chat.name.spelling" },
+        { "name", "chat.name.asked" },
 
-        // Weather
-        { "weather", "weather.current" },
-        { "temperature", "weather.current.temp" },
+        { "weather", "weather.forecast" },
+        { "temperature", "weather.temperature" },
 
-        // System / Time
         { "time", "sys.time.now" },
-        { "date", "sys.date.today" },
+        { "date", "sys.time.date" },
         { "dayofweek", "sys.time.dayofweek" },
 
-        // Operations / App control
-        { "performexitdansby", "app.exit" },
-        { "openerrorlog", "ops.errorlog.open" },
-        { "forcesavelorehaven", "ops.autosave.force" },
-        { "pauseautosavetimer", "ops.autosave.pause" },
-        { "resumeautosavetimer", "ops.autosave.resume" },
-        { "listallfunctions", "sys.capabilities.list" },
+        { "performexitdansby", "app.exit" },              // deprecated; map if you still allow it
+        { "openerrorlog", "ops.errorlog.open" },          // deprecated
+        { "forcesavelorehaven", "ops.autosave.force" },   // deprecated
+        { "pauseautosavetimer", "ops.autosave.pause" },   // deprecated
+        { "resumeautosavetimer", "ops.autosave.resume" }, // deprecated
+        { "listallfunctions", "sys.status.listallfunctions" }, // legacy
 
-        // Media
-        { "handlevolumeintent", "media.volume.set" },
-
-        // UI / Toys
-        { "summonslime", "ui.sprite.summon" },
-
-        // Legacy lights (if any examples still use these)
-        { "lights.on",  "iot.lights.set" },
-        { "lights.off", "iot.lights.set" }
+        { "handlevolumeintent", "media.volume.set" },    
+        { "summonslime", "ui.sprite.summon" }           
     };
 
 }
