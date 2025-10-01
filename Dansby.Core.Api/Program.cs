@@ -17,10 +17,16 @@ internal class Program
         builder.Services.AddSingleton<IIntentQueue, InMemoryPriorityQueue>();
         builder.Services.AddSingleton<IHandlerRegistry, HandlerRegistry>();
 
-        // v1.1 recognizer wired into v2
-        builder.Services.AddSingleton<Pipes.Nlp.Mapping.V1Tokenizer>();
-        builder.Services.AddSingleton<Pipes.Nlp.Mapping.V1RecognizerEngine>();
-        builder.Services.AddSingleton<Pipes.Nlp.Mapping.ITextRecognizer, Pipes.Nlp.Mapping.V1RecognizerAdapter>();
+        // NLP services
+        builder.Services.AddSingleton<ITokenizer, V1Tokenizer>();     // bind interface → concrete
+        builder.Services.AddSingleton<V1RecognizerEngine>();          // engine
+        builder.Services.AddSingleton<ITextRecognizer, V1RecognizerAdapter>(); // adapter
+        builder.Services.AddSingleton<Pipes.Nlp.Mapping.Responses.IResponseMap>(sp =>
+        {
+            var env = sp.GetRequiredService<IHostEnvironment>();
+            var path = Path.Combine(env.ContentRootPath, "response_mappings.json");
+            return new Pipes.Nlp.Mapping.Responses.ResponseMap(path);
+        });
 
         // Auto-Registry for Handlers
         builder.Services.AddAllIntentHandlersFrom
@@ -54,15 +60,14 @@ internal class Program
         // Lightweight sink for "ui.out.say"
         builder.Services.AddSingleton<Dansby.Shared.IIntentHandler, Pipes.Nlp.Mapping.UiSayLogHandler>();
 
-        // Register one ReplyHandler per canonical intent (instances with different Names)
         string[] replyIntents =
         {
-            "chat.greet","chat.goodbye","chat.help","chat.howareyou","chat.currenttask",
-            "chat.creator.name","chat.favorites.color","chat.thanks",
-            "chat.affection.compliment","chat.affection.love","chat.affection.missyou",
-            "chat.name.called","chat.name.misspelling","fun.easteregg.steven",
-            "weather.current","weather.current.temp",
-            "sys.time.now","sys.date.today","sys.time.dayofweek"
+            "chat.greet","chat.farewell","chat.help","chat.howareyou","sys.status.current",
+            "sys.meta.creator","sys.meta.favoritecolor","chat.thanks.reply",
+            "chat.compliment","chat.love","chat.missedyou.reply",
+            "chat.name.confirm","chat.name.spelling","chat.name.asked","fun.easteregg.steven",
+            "weather.forecast","weather.temperature",
+            "sys.time.now","sys.time.date","sys.time.dayofweek"
         };
 
         foreach (var intent in replyIntents)
