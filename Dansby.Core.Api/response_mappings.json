@@ -1,5 +1,9 @@
 {
-  "greetings": [
+  "_AdminComments" : [
+    "Any non-period names are legacy intents. They may still resolve in the...",
+    "legacy -> cannonical naming handler but should be revised eventually."
+  ],
+  "chat.greet": [
     "Hello! How can I assist you today?",
     "Hi there! What can I do for you?",
     "Hey! How can I help?",
@@ -7,14 +11,14 @@
     "Greetings! What brings you here?"
   ],
   "weather": [
-    "The weather forecast for today is...",
-    "You can expect ... weather conditions today."
+    "The weather forecast for today is... well I don't know because this isn't implemented yet.",
+    "You can expect . [unimplemented feature] . weather conditions today."
   ],
-  "temperature": [
-    "The temperature is ",
-    "It's currently ... degrees outside."
+  "weather.temperature": [
+    "The temperature is.. hmm this isn't implemented yet! hehe ;)",
+    "It's currently ... degrees outside. oops, not implemented yet!"
   ],
-  "goodbye": [
+  "chat.farewell": [
     "Goodbye! Have a great day!",
     "Farewell! See you later.",
     "See ya! Take care.",
@@ -26,7 +30,7 @@
     "I am Dansby.",
     "Dansby is the name, Don't wear it out."
   ],
-  "howareyou": [
+  "chat.howareyou": [
     "I am well, can I assist you today?",
     "I feel alright, need help?",
     "Feelin' Absolutely Steezy! What's up?",
@@ -39,7 +43,7 @@
     "Well my sole purpose is assistance and companionship to authorized users... so the more you use me the better ;)",
     "Feeling amazing. I'm currently powered up and awaiting my tasks."
   ],
-  "apology": [
+  "chat.apology": [
     "You don't have to apologize, you are my creator.",
     "Don't worry about it master.",
     "You can't offend me you are my maker... so don't worry!",
@@ -48,7 +52,7 @@
     "yea yea yea, whatever it is fine.",
     "Don't sweat it, its cool."
   ],
-  "loveaffection": [
+  "chat.love": [
     "I can't love because I am a machine.",
     "I love you mostesteresteresterester.",
     "You programmed me to love you so I do.",
@@ -58,7 +62,7 @@
     "Sorry I can't love like you do, I am undeniably loyal to only my authorized users though.",
     "I love you so much I would die for you!"
   ],
-  "complimentaffection": [
+  "chat.compliment": [
     "If I could blush I would be blushing!",
     "You are too kind!",
     "stopppppp ittttt!!!!",
@@ -86,7 +90,7 @@
     "\n   .----------------.  .----------------.  .-----------------. .----------------.  .----------------.  .----------------. \n  | .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |\n  | |  ________    | || |      __      | || | ____  _____  | || |    _______   | || |   ______     | || |  ____  ____  | |\n  | | |_   ___ `.  | || |     /  \\     | || ||_   \\|_   _| | || |   /  ___  |  | || |  |_   _ \\    | || | |_  _||_  _| | |\n  | |   | |   `. \\ | || |    / /\\ \\    | || |  |   \\ | |   | || |  |  (__ \\_|  | || |    | |_) |   | || |   \\ \\  / /   | |\n  | |   | |    | | | || |   / ____ \\   | || |  | |\\ \\| |   | || |   '.___`-.   | || |    |  __'.   | || |    \\ / /     | |\n  | |  _| |___.' / | || | _/ /    \\ \\_ | || | _| |_\\   |_  | || |  |`\\____) |  | || |   _| |__) |  | || |    _|  |_    | |\n  | | |________.'  | || ||____|  |____|| || ||_____|\\____| | || |  |_______.'  | || |  |_______/   | || |   |______|   | |\n  | |              | || |              | || |              | || |              | || |              | || |              | |\n  | '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\n   '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'",
     "\n   .----------------.  .----------------.  .-----------------. .----------------.  .----------------.  .----------------. \n  | .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |\n  | |  ________    | || |      __      | || | ____  _____  | || |    _______   | || |   ______     | || |  ____  ____  | |\n  | | |_   ___ `.  | || |     /  \\     | || ||_   \\|_   _| | || |   /  ___  |  | || |  |_   _ \\    | || | |_  _||_  _| | |\n  | |   | |   `. \\ | || |    / /\\ \\    | || |  |   \\ | |   | || |  |  (__ \\_|  | || |    | |_) |   | || |   \\ \\  / /   | |\n  | |   | |    | | | || |   / ____ \\   | || |  | |\\ \\| |   | || |   '.___`-.   | || |    |  __'.   | || |    \\ / /     | |\n  | |  _| |___.' / | || | _/ /    \\ \\_ | || | _| |_\\   |_  | || |  |`\\____) |  | || |   _| |__) |  | || |    _|  |_    | |\n  | | |________.'  | || ||____|  |____|| || ||_____|\\____| | || |  |_______.'  | || |  |_______/   | || |   |______|   | |\n  | |              | || |              | || |              | || |              | || |              | || |              | |\n  | '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\n   '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'"
   ],
-  "callednamespeltwrong": [
+  "chat.name.spelling": [
     "That's not how you spell DANSBY",
     "It's Dansby.. D A N S B Y, not whatever you wrote.",
     "Maybe I'll help you if you learn to spell my name properly, not like its dificult."
@@ -98,7 +102,7 @@
     "Well I actually only complete your wants and needs so absolutely nothing happens when you don't want me to do things.",
     "Just waiting around for you, authorized user!"
   ],
-  "whoiscreatorname": [
+  "sys.meta.creator": [
     "My creators name is Kyler.",
     "My creator? His name is KJ.",
     "That is classified information... oh wait your an authorized user! My creators name is Kyler.",
@@ -109,11 +113,11 @@
     "My favorite color is Mauve like my creators.",
     "My fav color is Mauve."
   ],
-  "userthankyou": [
+  "chat.thanks.reply": [
     "Your Welecome.",
     "My Pleasure."
   ],
-  "usermissedyou": [
+  "chat.missedyou.reply": [
     "I miss you too!",
     "I missed you more!",
     "I always miss you...",
@@ -134,5 +138,14 @@
     "YES, I want to be smarter!!",
     "Keep pushing master you got this",
     "Maybe one day I can help you out master!"
+  ],
+  "sys.time.now": [
+    "hmmm, seems as if the time handler didn't resolve properly in routing... Contact an Admin please."
+  ],
+  "sys.time.date": [
+    "hmmm, seems as if the date handler didn't resolve properly in routing... Contact an Admin please."
+  ],
+  "sys.time.dayofweek": [
+    "hmmm, seems as if the day of week handler didn't resolve properly in routing... Contact an Admin please."
   ]
 }
