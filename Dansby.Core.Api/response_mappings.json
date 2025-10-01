@@ -10,7 +10,7 @@
     "Howdy! I'm doing well, thank you. How about you?",
     "Greetings! What brings you here?"
   ],
-  "weather": [
+  "weather.forecast": [
     "The weather forecast for today is... well I don't know because this isn't implemented yet.",
     "You can expect . [unimplemented feature] . weather conditions today."
   ],
@@ -23,12 +23,6 @@
     "Farewell! See you later.",
     "See ya! Take care.",
     "Until next time! Bye!"
-  ],
-  "name": [
-    "My name is Dansby.",
-    "Dansby, whats your name?",
-    "I am Dansby.",
-    "Dansby is the name, Don't wear it out."
   ],
   "chat.howareyou": [
     "I am well, can I assist you today?",
@@ -70,32 +64,28 @@
     "You are too kind!",
     "awe thank you very much"
   ],
-  "creatorname": [
-    "I know your name master.",
-    "All hail the creator!",
-    "Death to all that are not by thy name of Kyler.",
-    "KYLER KYLER KYLER KYLER, sorry was just chanting the name of my holy creator."
-  ],
-  "help": [
+  "chat.help": [
     "I am Dansby and am capable of conversational flow. I can perform functions (tasks) for you and am forever growing as I accept and adapt prompts. \n If you ask me to list all my functions I will give a list of all current functions I can complete with detailed explanations."
   ],
-  "calledname": [
+  "chat.name.asked": [
     "My name is infact Dansby",
     "That is my name",
     "Correct I am Dansby... also known as D.A.N.S.B.Y. Dangerously Awesomely Noblest Super Busy Yapper... just kidding I made that up.",
     "My name is Dansby... derived from my creators nickname of the same utterance Dansby, given to him by his bestfriend Colin based off the MLB player Dansby Swanson.",
     "Dansby is the name, did you call for me?",
     "That is correct, My name is Dansby.",
-    "You know my name is infront of all the text I respond with......",
-    "\n   .----------------.  .----------------.  .-----------------. .----------------.  .----------------.  .----------------. \n  | .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |\n  | |  ________    | || |      __      | || | ____  _____  | || |    _______   | || |   ______     | || |  ____  ____  | |\n  | | |_   ___ `.  | || |     /  \\     | || ||_   \\|_   _| | || |   /  ___  |  | || |  |_   _ \\    | || | |_  _||_  _| | |\n  | |   | |   `. \\ | || |    / /\\ \\    | || |  |   \\ | |   | || |  |  (__ \\_|  | || |    | |_) |   | || |   \\ \\  / /   | |\n  | |   | |    | | | || |   / ____ \\   | || |  | |\\ \\| |   | || |   '.___`-.   | || |    |  __'.   | || |    \\ / /     | |\n  | |  _| |___.' / | || | _/ /    \\ \\_ | || | _| |_\\   |_  | || |  |`\\____) |  | || |   _| |__) |  | || |    _|  |_    | |\n  | | |________.'  | || ||____|  |____|| || ||_____|\\____| | || |  |_______.'  | || |  |_______/   | || |   |______|   | |\n  | |              | || |              | || |              | || |              | || |              | || |              | |\n  | '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\n   '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'",
-    "\n   .----------------.  .----------------.  .-----------------. .----------------.  .----------------.  .----------------. \n  | .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |\n  | |  ________    | || |      __      | || | ____  _____  | || |    _______   | || |   ______     | || |  ____  ____  | |\n  | | |_   ___ `.  | || |     /  \\     | || ||_   \\|_   _| | || |   /  ___  |  | || |  |_   _ \\    | || | |_  _||_  _| | |\n  | |   | |   `. \\ | || |    / /\\ \\    | || |  |   \\ | |   | || |  |  (__ \\_|  | || |    | |_) |   | || |   \\ \\  / /   | |\n  | |   | |    | | | || |   / ____ \\   | || |  | |\\ \\| |   | || |   '.___`-.   | || |    |  __'.   | || |    \\ / /     | |\n  | |  _| |___.' / | || | _/ /    \\ \\_ | || | _| |_\\   |_  | || |  |`\\____) |  | || |   _| |__) |  | || |    _|  |_    | |\n  | | |________.'  | || ||____|  |____|| || ||_____|\\____| | || |  |_______.'  | || |  |_______/   | || |   |______|   | |\n  | |              | || |              | || |              | || |              | || |              | || |              | |\n  | '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\n   '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'"
+    "My name is Dansby.",
+    "Dansby, whats your name?",
+    "I am Dansby.",
+    "Dansby is the name, Don't wear it out.",
+    "You know my name is infront of all the text I respond with......"
   ],
   "chat.name.spelling": [
     "That's not how you spell DANSBY",
     "It's Dansby.. D A N S B Y, not whatever you wrote.",
     "Maybe I'll help you if you learn to spell my name properly, not like its dificult."
   ],
-  "currenttask": [
+  "sys.status.current": [
     "Nothing much is going on until you ask me to complete tasks for you.",
     "I am just chillin, can I help out with anything?",
     "Just kickin' it back!",
@@ -109,7 +99,7 @@
     "My creator goes by a couple names: Kyler, KJ, Dansby, Kyky, Ky, Kuler, Kyla, and many more throughout his history.",
     "If you have authorized access to my usage, my creator gave you access and entry so you know his name... Guess there are such things as a dumb question..."
   ],
-  "dansbyfavcolor": [
+  "sys.meta.favoritecolor": [
     "My favorite color is Mauve like my creators.",
     "My fav color is Mauve."
   ],
@@ -131,13 +121,6 @@
     "Steven Leyva has the largest cock!",
     "According to the Guinness Book of World Records, a young man by the name of Steven Anthony Leyva, hailing from Northern New Jersey, United States, has the largest Penis. His Penis is approximately 13 feet and 7 and 3/4 inches with a slight right curve. It blew the previous record by Kevin Love out of the water by 12 feet and 7 and 3/4 inches. ",
     "SteveBob Has the biggest of big weiners."
-  ],
-  "usercurrenttaskcodingondansby": [
-    "Thanks for always improving me!",
-    "I appreciate you always making me better",
-    "YES, I want to be smarter!!",
-    "Keep pushing master you got this",
-    "Maybe one day I can help you out master!"
   ],
   "sys.time.now": [
     "hmmm, seems as if the time handler didn't resolve properly in routing... Contact an Admin please."

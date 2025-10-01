@@ -1,10 +1,9 @@
 [
   {
     "Name": "chat.greet",
-    "Tags": [
-      "social",
-      "casual"
-    ],
+    "Tags": ["social", "casual"],
+    "Alliases": ["greetings", "hello", "hi"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "hello",
@@ -147,11 +146,10 @@
     ]
   },
   {
-    "Name": "weather",
-    "Tags": [
-      "information",
-      "weather"
-    ],
+    "Name": "weather.forecast",
+    "Tags": ["information", "weather"],
+    "Alliases": ["weather", "forecast"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "weather forecast",
@@ -189,11 +187,10 @@
     ]
   },
   {
-    "Name": "temperature",
-    "Tags": [
-      "information",
-      "weather"
-    ],
+    "Name": "weather.temperature",
+    "Tags": ["information", "weather"],
+    "Alliases": ["temperature"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "what's the temperature?",
@@ -233,11 +230,10 @@
     ]
   },
   {
-    "Name": "goodbye",
-    "Tags": [
-      "social",
-      "casual"
-    ],
+    "Name": "chat.farewell",
+    "Tags": ["social", "casual"],
+    "Alliases": ["goodbye", "farewell"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "bye",
@@ -288,11 +284,10 @@
     ]
   },
   {
-    "Name": "help",
-    "Tags": [
-      "interaction",
-      "support"
-    ],
+    "Name": "chat.help",
+    "Tags": ["interaction", "support"],
+    "Alliases": "",
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "help",
@@ -373,11 +368,10 @@
     ]
   },
   {
-    "Name": "howareyou",
-    "Tags": [
-      "social",
-      "casual"
-    ],
+    "Name": "chat.howareyou",
+    "Tags": ["social", "casual"],
+    "Alliases": ["howareyou"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "how are you?",
@@ -476,11 +470,10 @@
     ]
   },
   {
-    "Name": "currenttask",
-    "Tags": [
-      "interaction",
-      "status"
-    ],
+    "Name": "sys.status.current",
+    "Tags": ["interaction", "status"],
+    "Alliases": ["currenttask"],
+    "Depreciated":false,
     "Examples": [
       {
         "Utterance": "what's up?",
@@ -534,11 +527,9 @@
   },
   {
     "Name": "performexitdansby",
-    "Tags": [
-      "system",
-      "functional",
-      "information"
-    ],
+    "Tags": ["system", "functional", "information"],
+    "Alliases": ["Version1.1-Depreciated"],
+    "Depreciated": true,
     "Examples": [
       {
         "Utterance": "exit the program Dansby",
@@ -587,12 +578,10 @@
     ]
   },
   {
-    "Name": "dayofweek",
-    "Tags": [
-      "system",
-      "functional",
-      "information"
-    ],
+    "Name": "sys.time.dayofweek",
+    "Tags": ["system", "functional", "information"],
+    "Alliases": ["dayofweek"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "what's the day of the week?",
@@ -626,10 +615,10 @@
     ]
   },
   {
-    "Name": "whoiscreatorname",
-    "Tags": [
-      "information"
-    ],
+    "Name": "sys.meta.creatorname",
+    "Tags": ["information"],
+    "Alliases": ["whoiscreatorname", "creatorname"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "what's your creator's name?",
@@ -643,11 +632,10 @@
     ]
   },
   {
-    "Name": "dansbyfavcolor",
-    "Tags": [
-      "information",
-      "casual"
-    ],
+    "Name": "sys.meta.favoritecolor",
+    "Tags": ["information", "casual"],
+    "Alliases": ["dansbyfavcolor", "favcolor"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "what's your favorite color?",
@@ -670,11 +658,10 @@
     ]
   },
   {
-    "Name": "userthankyou",
-    "Tags": [
-      "social",
-      "interaction"
-    ],
+    "Name": "chat.thanks.reply",
+    "Tags": ["social", "interaction"],
+    "Alliases": ["userthankyou"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "thanks",
@@ -706,11 +693,10 @@
     ]
   },
   {
-    "Name": "complimentaffection",
-    "Tags": [
-      "social",
-      "interaction"
-    ],
+    "Name": "chat.compliment",
+    "Tags": ["social", "interaction"],
+    "Alliases": ["complimentaffection"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "you rock",
@@ -754,11 +740,10 @@
     ]
   },
   {
-    "Name": "loveaffection",
-    "Tags": [
-      "social",
-      "casual"
-    ],
+    "Name": "chat.love",
+    "Tags": ["social", "casual"],
+    "Alliases": ["loveaffection"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "I love you",
@@ -796,10 +781,9 @@
   },
   {
     "Name": "steveneasteregg",
-    "Tags": [
-      "fun",
-      "easteregg"
-    ],
+    "Tags": ["fun", "easteregg"],
+    "Alliases": ["steveneasteregg"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "who has the biggest weiner",
@@ -814,11 +798,10 @@
     ]
   },
   {
-    "Name": "listallfunctions",
-    "Tags": [
-      "system",
-      "functional"
-    ],
+    "Name": "sys.status.listallfunctions",
+    "Tags": ["system", "functional"],
+    "Alliases": ["listallfunctions"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "list all the functions",
@@ -850,12 +833,10 @@
     ]
   },
   {
-    "Name": "time",
-    "Tags": [
-      "system",
-      "functional",
-      "information"
-    ],
+    "Name": "sys.time.now",
+    "Tags": ["system", "functional", "information"],
+    "Alliases": [],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "what time is it",
@@ -886,12 +867,10 @@
     ]
   },
   {
-    "Name": "date",
-    "Tags": [
-      "system",
-      "functional",
-      "information"
-    ],
+    "Name": "sys.time.date",
+    "Tags": ["system", "functional", "information"],
+    "Alliases": [],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "what's today's date?",
@@ -941,11 +920,9 @@
   },
   {
     "Name": "summonslime",
-    "Tags": [
-      "system",
-      "functional",
-      "information"
-    ],
+    "Tags": ["system", "functional", "information"],
+    "Alliases": ["Version1.1-Depreciated"],
+    "Depreciated": true,
     "Examples": [
       {
         "Utterance": "summon slime",
@@ -964,11 +941,9 @@
   },
   {
     "Name": "openerrorlog",
-    "Tags": [
-      "system",
-      "functional",
-      "information"
-    ],
+    "Tags": ["system", "functional", "information"],
+    "Alliases": ["Version1.1-Depreciated"],
+    "Depreciated": true,
     "Examples": [
       {
         "Utterance": "open error log",
@@ -989,11 +964,9 @@
   },
   {
     "Name": "forcesavelorehaven",
-    "Tags": [
-      "system",
-      "functional",
-      "information"
-    ],
+    "Tags": ["system", "functional", "information"],
+    "Alliases": ["Version1.1-Depreciated"],
+    "Depreciated": true,
     "Examples": [
       {
         "Utterance": "force save lorehaven",
@@ -1035,11 +1008,9 @@
   },
   {
     "Name": "pauseautosavetimer",
-    "Tags": [
-      "system",
-      "functional",
-      "information"
-    ],
+    "Tags": ["system", "functional", "information"],
+    "Alliases": ["Version1.1-Depreciated"],
+    "Depreciated": true,
     "Examples": [
       {
         "Utterance": "pause autosave timer",
@@ -1077,11 +1048,9 @@
   },
   {
     "Name": "resumeautosavetimer",
-    "Tags": [
-      "system",
-      "functional",
-      "information"
-    ],
+    "Tags": ["system", "functional", "information"],
+    "Alliases": ["Version1.1-Depreciated"],
+    "Depreciated": true,
     "Examples": [
       {
         "Utterance": "resume autosave timer",
@@ -1152,11 +1121,9 @@
   },
   {
     "Name": "handlevolumeintent",
-    "Tags": [
-      "system",
-      "functional",
-      "information"
-    ],
+    "Tags": ["system", "functional", "information"],
+    "Alliases": ["Version1.1-Depreciated"],
+    "Depreciated": true,
     "Examples": [
       {
         "Utterance": "decrease the volume",
@@ -1193,53 +1160,10 @@
     ]
   },
   {
-    "Name": "usercurrenttaskcodingondansby",
-    "Tags": [
-      "system",
-      "interaction"
-    ],
-    "Examples": [
-      {
-        "Utterance": "I am working on coding you more",
-        "Tokens": [
-          "I",
-          "am",
-          "working",
-          "on",
-          "coding",
-          "you",
-          "more"
-        ]
-      },
-      {
-        "Utterance": "im working on improving your code",
-        "Tokens": [
-          "im",
-          "working",
-          "on",
-          "improving",
-          "your",
-          "code"
-        ]
-      },
-      {
-        "Utterance": "working on improving your code",
-        "Tokens": [
-          "working",
-          "on",
-          "improving",
-          "your",
-          "code"
-        ]
-      }
-    ]
-  },
-  {
-    "Name": "usermissedyou",
-    "Tags": [
-      "social",
-      "affection"
-    ],
+    "Name": "chat.missedyou.reply",
+    "Tags": ["social", "affection"],
+    "Alliases": ["usermissedyou"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "i missed you",
@@ -1286,26 +1210,10 @@
     ]
   },
   {
-    "Name": "creatorname",
-    "Tags": [
-      "information",
-      "system"
-    ],
-    "Examples": [
-      {
-        "Utterance": "kyler",
-        "Tokens": [
-          "kyler"
-        ]
-      }
-    ]
-  },
-  {
-    "Name": "calledname",
-    "Tags": [
-      "information",
-      "system"
-    ],
+    "Name": "chat.name.confirm",
+    "Tags": ["information", "system"],
+    "Alliases": ["calledname"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "dansby",
@@ -1316,11 +1224,10 @@
     ]
   },
   {
-    "Name": "callednamespeltwrong",
-    "Tags": [
-      "information",
-      "system"
-    ],
+    "Name": "chat.name.spelling",
+    "Tags": ["information", "system"],
+    "Alliases": ["callednamespeltwrong, wrongnamedcalled"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "danssby",
@@ -1355,11 +1262,10 @@
     ]
   },
   {
-    "Name": "name",
-    "Tags": [
-      "information",
-      "system"
-    ],
+    "Name": "chat.name.asked",
+    "Tags": ["information", "system"],
+    "Alliases": ["name", "nameaskedfor"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "what's your name?",
@@ -1381,11 +1287,10 @@
     ]
   },
   {
-    "Name": "apology",
-    "Tags": [
-      "social",
-      "casual"
-    ],
+    "Name": "chat.apology",
+    "Tags": ["social", "casual"],
+    "Alliases": ["apology"],
+    "Depreciated": false,
     "Examples": [
       {
         "Utterance": "sorry",
