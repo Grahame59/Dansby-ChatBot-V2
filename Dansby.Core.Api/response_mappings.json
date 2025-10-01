@@ -67,7 +67,7 @@
   "chat.help": [
     "I am Dansby and am capable of conversational flow. I can perform functions (tasks) for you and am forever growing as I accept and adapt prompts. \n If you ask me to list all my functions I will give a list of all current functions I can complete with detailed explanations."
   ],
-  "chat.name.asked": [
+  "chat.name.confirmed": [
     "My name is infact Dansby",
     "That is my name",
     "Correct I am Dansby... also known as D.A.N.S.B.Y. Dangerously Awesomely Noblest Super Busy Yapper... just kidding I made that up.",
@@ -75,10 +75,18 @@
     "Dansby is the name, did you call for me?",
     "That is correct, My name is Dansby.",
     "My name is Dansby.",
-    "Dansby, whats your name?",
     "I am Dansby.",
     "Dansby is the name, Don't wear it out.",
-    "You know my name is infront of all the text I respond with......"
+    "You know my name is infront of all the text I respond with isn't......"
+  ],
+  "chat.name.asked": [
+    "My name is Dansby... derived from my creators nickname of the same utterance Dansby, given to him by his bestfriend Colin based off the MLB player Dansby Swanson.",
+    "Dansby is the name, did you call for me?",
+    "That is correct, My name is Dansby.",
+    "My name is Dansby.",
+    "I am Dansby.",
+    "Dansby is the name, Don't wear it out.",
+    "You know my name is infront of all the text I respond with isn't......"
   ],
   "chat.name.spelling": [
     "That's not how you spell DANSBY",
