@@ -67,7 +67,7 @@
   "chat.help": [
     "I am Dansby and am capable of conversational flow. I can perform functions (tasks) for you and am forever growing as I accept and adapt prompts. \n If you ask me to list all my functions I will give a list of all current functions I can complete with detailed explanations."
   ],
-  "chat.name.confirmed": [
+  "chat.name.confirm": [
     "My name is infact Dansby",
     "That is my name",
     "Correct I am Dansby... also known as D.A.N.S.B.Y. Dangerously Awesomely Noblest Super Busy Yapper... just kidding I made that up.",

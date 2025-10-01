@@ -2,8 +2,8 @@
   {
     "Name": "chat.greet",
     "Tags": ["social", "casual"],
-    "Alliases": ["greetings", "hello", "hi"],
-    "Depreciated": false,
+    "Aliases": ["greetings", "hello", "hi"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "hello",
@@ -148,8 +148,8 @@
   {
     "Name": "weather.forecast",
     "Tags": ["information", "weather"],
-    "Alliases": ["weather", "forecast"],
-    "Depreciated": false,
+    "Aliases": ["weather", "forecast"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "weather forecast",
@@ -189,8 +189,8 @@
   {
     "Name": "weather.temperature",
     "Tags": ["information", "weather"],
-    "Alliases": ["temperature"],
-    "Depreciated": false,
+    "Aliases": ["temperature"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "what's the temperature?",
@@ -232,8 +232,8 @@
   {
     "Name": "chat.farewell",
     "Tags": ["social", "casual"],
-    "Alliases": ["goodbye", "farewell"],
-    "Depreciated": false,
+    "Aliases": ["goodbye", "farewell"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "bye",
@@ -286,8 +286,8 @@
   {
     "Name": "chat.help",
     "Tags": ["interaction", "support"],
-    "Alliases": "",
-    "Depreciated": false,
+    "Aliases": "",
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "help",
@@ -370,8 +370,8 @@
   {
     "Name": "chat.howareyou",
     "Tags": ["social", "casual"],
-    "Alliases": ["howareyou"],
-    "Depreciated": false,
+    "Aliases": ["howareyou"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "how are you?",
@@ -472,8 +472,8 @@
   {
     "Name": "sys.status.current",
     "Tags": ["interaction", "status"],
-    "Alliases": ["currenttask"],
-    "Depreciated":false,
+    "Aliases": ["currenttask"],
+    "Deprecated":false,
     "Examples": [
       {
         "Utterance": "what's up?",
@@ -528,8 +528,8 @@
   {
     "Name": "performexitdansby",
     "Tags": ["system", "functional", "information"],
-    "Alliases": ["Version1.1-Depreciated"],
-    "Depreciated": true,
+    "Aliases": ["Version1.1-Deprecited"],
+    "Deprecited": true,
     "Examples": [
       {
         "Utterance": "exit the program Dansby",
@@ -580,8 +580,8 @@
   {
     "Name": "sys.time.dayofweek",
     "Tags": ["system", "functional", "information"],
-    "Alliases": ["dayofweek"],
-    "Depreciated": false,
+    "Aliases": ["dayofweek"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "what's the day of the week?",
@@ -615,10 +615,10 @@
     ]
   },
   {
-    "Name": "sys.meta.creatorname",
+    "Name": "sys.meta.creator",
     "Tags": ["information"],
-    "Alliases": ["whoiscreatorname", "creatorname"],
-    "Depreciated": false,
+    "Aliases": ["whoiscreatorname", "creatorname"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "what's your creator's name?",
@@ -634,8 +634,8 @@
   {
     "Name": "sys.meta.favoritecolor",
     "Tags": ["information", "casual"],
-    "Alliases": ["dansbyfavcolor", "favcolor"],
-    "Depreciated": false,
+    "Aliases": ["dansbyfavcolor", "favcolor"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "what's your favorite color?",
@@ -660,8 +660,8 @@
   {
     "Name": "chat.thanks.reply",
     "Tags": ["social", "interaction"],
-    "Alliases": ["userthankyou"],
-    "Depreciated": false,
+    "Aliases": ["userthankyou"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "thanks",
@@ -695,8 +695,8 @@
   {
     "Name": "chat.compliment",
     "Tags": ["social", "interaction"],
-    "Alliases": ["complimentaffection"],
-    "Depreciated": false,
+    "Aliases": ["complimentaffection"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "you rock",
@@ -742,8 +742,8 @@
   {
     "Name": "chat.love",
     "Tags": ["social", "casual"],
-    "Alliases": ["loveaffection"],
-    "Depreciated": false,
+    "Aliases": ["loveaffection"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "I love you",
@@ -782,8 +782,8 @@
   {
     "Name": "steveneasteregg",
     "Tags": ["fun", "easteregg"],
-    "Alliases": ["steveneasteregg"],
-    "Depreciated": false,
+    "Aliases": ["steveneasteregg"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "who has the biggest weiner",
@@ -800,8 +800,8 @@
   {
     "Name": "sys.status.listallfunctions",
     "Tags": ["system", "functional"],
-    "Alliases": ["listallfunctions"],
-    "Depreciated": false,
+    "Aliases": ["listallfunctions"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "list all the functions",
@@ -835,8 +835,8 @@
   {
     "Name": "sys.time.now",
     "Tags": ["system", "functional", "information"],
-    "Alliases": [],
-    "Depreciated": false,
+    "Aliases": [],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "what time is it",
@@ -869,8 +869,8 @@
   {
     "Name": "sys.time.date",
     "Tags": ["system", "functional", "information"],
-    "Alliases": [],
-    "Depreciated": false,
+    "Aliases": [],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "what's today's date?",
@@ -921,8 +921,8 @@
   {
     "Name": "summonslime",
     "Tags": ["system", "functional", "information"],
-    "Alliases": ["Version1.1-Depreciated"],
-    "Depreciated": true,
+    "Aliases": ["Version1.1-Deprecated"],
+    "Deprecated": true,
     "Examples": [
       {
         "Utterance": "summon slime",
@@ -942,8 +942,8 @@
   {
     "Name": "openerrorlog",
     "Tags": ["system", "functional", "information"],
-    "Alliases": ["Version1.1-Depreciated"],
-    "Depreciated": true,
+    "Aliases": ["Version1.1-Deprecated"],
+    "Deprecated": true,
     "Examples": [
       {
         "Utterance": "open error log",
@@ -965,8 +965,8 @@
   {
     "Name": "forcesavelorehaven",
     "Tags": ["system", "functional", "information"],
-    "Alliases": ["Version1.1-Depreciated"],
-    "Depreciated": true,
+    "Aliases": ["Version1.1-Deprecated"],
+    "Deprecated": true,
     "Examples": [
       {
         "Utterance": "force save lorehaven",
@@ -1009,8 +1009,8 @@
   {
     "Name": "pauseautosavetimer",
     "Tags": ["system", "functional", "information"],
-    "Alliases": ["Version1.1-Depreciated"],
-    "Depreciated": true,
+    "Aliases": ["Version1.1-Deprecated"],
+    "Deprecated": true,
     "Examples": [
       {
         "Utterance": "pause autosave timer",
@@ -1049,8 +1049,8 @@
   {
     "Name": "resumeautosavetimer",
     "Tags": ["system", "functional", "information"],
-    "Alliases": ["Version1.1-Depreciated"],
-    "Depreciated": true,
+    "Aliases": ["Version1.1-Deprecated"],
+    "Deprecated": true,
     "Examples": [
       {
         "Utterance": "resume autosave timer",
@@ -1122,8 +1122,8 @@
   {
     "Name": "handlevolumeintent",
     "Tags": ["system", "functional", "information"],
-    "Alliases": ["Version1.1-Depreciated"],
-    "Depreciated": true,
+    "Aliases": ["Version1.1-Deprecated"],
+    "Deprecated": true,
     "Examples": [
       {
         "Utterance": "decrease the volume",
@@ -1162,8 +1162,8 @@
   {
     "Name": "chat.missedyou.reply",
     "Tags": ["social", "affection"],
-    "Alliases": ["usermissedyou"],
-    "Depreciated": false,
+    "Aliases": ["usermissedyou"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "i missed you",
@@ -1212,8 +1212,8 @@
   {
     "Name": "chat.name.confirm",
     "Tags": ["information", "system"],
-    "Alliases": ["calledname"],
-    "Depreciated": false,
+    "Aliases": ["calledname"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "dansby",
@@ -1226,8 +1226,8 @@
   {
     "Name": "chat.name.spelling",
     "Tags": ["information", "system"],
-    "Alliases": ["callednamespeltwrong, wrongnamedcalled"],
-    "Depreciated": false,
+    "Aliases": ["callednamespeltwrong", "wrongnamedcalled"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "danssby",
@@ -1264,8 +1264,8 @@
   {
     "Name": "chat.name.asked",
     "Tags": ["information", "system"],
-    "Alliases": ["name", "nameaskedfor"],
-    "Depreciated": false,
+    "Aliases": ["name", "nameaskedfor"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "what's your name?",
@@ -1289,8 +1289,8 @@
   {
     "Name": "chat.apology",
     "Tags": ["social", "casual"],
-    "Alliases": ["apology"],
-    "Depreciated": false,
+    "Aliases": ["apology"],
+    "Deprecated": false,
     "Examples": [
       {
         "Utterance": "sorry",

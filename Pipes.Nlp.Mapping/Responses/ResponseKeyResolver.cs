@@ -1,40 +1,43 @@
 namespace Pipes.Nlp.Mapping.Responses;
-
-// Maps canonical intents → JSON keys in response_mappings.json
 public static class ResponseKeyResolver
 {
+    // Map canonical → legacy JSON keys (only when responses still use old names)
     private static readonly Dictionary<string, string[]> Map = new(StringComparer.OrdinalIgnoreCase)
     {
         // chat
-        ["chat.greet"]                  = new[] { "greetings" },                // #1
-        ["chat.farewell"]               = new[] { "goodbye" },                  // #2
-        ["chat.help"]                   = new[] { "help" },                     // #3
-        ["chat.howareyou"]              = new[] { "howareyou" },                // #4
-        ["sys.status.current"]          = new[] { "currenttask" },              // #5
-        ["sys.meta.creator"]            = new[] { "whoiscreatorname" },         // #6
-        ["sys.meta.favoritecolor"]      = new[] { "dansbyfavcolor" },           // #7
-        ["chat.thanks.reply"]           = new[] { "userthankyou" },             // #8
-        ["chat.compliment"]             = new[] { "complimentaffection" },      // #9
-        ["chat.love"]                   = new[] { "loveaffection" },            // #10
-        ["chat.missedyou.reply"]        = new[] { "usermissedyou" },            // #11
-        ["chat.name.asked"]             = new[] { "calledname" },               // #12
-        ["chat.name.confirmed"]         = new[] { "useraskedname"}              // #13
-        ["chat.name.spelling"]          = new[] { "callednamespeltwrong" },     // #14
-        ["fun.easteregg.steven"]        = new[] { "steveneasteregg" },          // #15
-        ["chat.apology"]                = new[] { "apology" },                  // #16
+        ["chat.greet"]             = new[] { "chat.greet", "greetings" },
+        ["chat.farewell"]          = new[] { "chat.farewell", "goodbye" },
+        ["chat.help"]              = new[] { "chat.help", "help" },
+        ["chat.howareyou"]         = new[] { "chat.howareyou", "howareyou" },
+        ["chat.apology"]           = new[] { "chat.apology", "apology" },
+        ["chat.love"]              = new[] { "chat.love", "loveaffection" },
+        ["chat.compliment"]        = new[] { "chat.compliment", "complimentaffection" },
+        ["chat.thanks.reply"]      = new[] { "chat.thanks.reply", "userthankyou" },
+        ["chat.missedyou.reply"]   = new[] { "chat.missedyou.reply", "usermissedyou" },
+        ["chat.name.asked"]        = new[] { "chat.name.asked", "name" },
+        ["chat.name.confirm"]      = new[] { "chat.name.confirm", "calledname" },
+        ["chat.name.spelling"]     = new[] { "chat.name.spelling", "callednamespeltwrong" },
 
-        // weather/system (static) [NOT IMPLEMENTED]
-        ["weather.forecast"]            = new[] { "weather" },                  // #17
-        ["weather.temperature"]         = new[] { "temperature" },              // #18
-        ["sys.status.listallfunctions"] = new[] { "listallfunctions" },         // #19
+        // system/meta/status
+        ["sys.meta.creator"]       = new[] { "sys.meta.creator", "whoiscreatorname", "creatorname" },
+        ["sys.meta.favoritecolor"] = new[] { "sys.meta.favoritecolor", "dansbyfavcolor", "favcolor" },
+        ["sys.status.current"]     = new[] { "sys.status.current", "currenttask" },
+        ["sys.status.listallfunctions"] = new[] { "sys.status.listallfunctions", "listallfunctions" },
 
-        // dynamic (no JSON needed)
-        ["sys.time.now"]                = Array.Empty<string>(),                // #20
-        ["sys.date.today"]              = Array.Empty<string>(),                // #21
-        ["sys.time.dayofweek"]          = Array.Empty<string>(),                // #22
+        // weather
+        ["weather.forecast"]       = new[] { "weather.forecast", "weather" },
+        ["weather.temperature"]    = new[] { "weather.temperature", "temperature" },
+
+        // dynamic (no responses needed) – keep empty
+        ["sys.time.now"]           = Array.Empty<string>(),
+        ["sys.time.date"]          = Array.Empty<string>(),
+        ["sys.time.dayofweek"]     = Array.Empty<string>(),
+
+        // fun
+        ["fun.easteregg.steven"]   = new[] { "steveneasteregg" }
 
         // There are 29 total Intent groups in (intent_mappings.json)
-        // 7 of the calls are depreciated and were migrated from V1.1
+        // 7 of the calls are deprecated and were migrated from V1.1
         // They are as follows:
 
         // #1. handlevolumeintent,                                              // #23
@@ -45,7 +48,9 @@ public static class ResponseKeyResolver
         // #6. summonslime                                                      // #28
         // #7. performexitdansby                                                // #29
     };
-
+    
     public static IEnumerable<string> CandidatesFor(string canonical)
-        => Map.TryGetValue(canonical, out var arr) && arr.Length > 0 ? arr : new[] { canonical };
+        => Map.TryGetValue(canonical, out var arr) && arr.Length > 0
+            ? arr
+            : new[] { canonical };
 }
