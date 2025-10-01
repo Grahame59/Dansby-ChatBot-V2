@@ -286,7 +286,7 @@
   {
     "Name": "chat.help",
     "Tags": ["interaction", "support"],
-    "Aliases": "",
+    "Aliases": [],
     "Deprecated": false,
     "Examples": [
       {
@@ -528,7 +528,7 @@
   {
     "Name": "performexitdansby",
     "Tags": ["system", "functional", "information"],
-    "Aliases": ["Version1.1-Deprecited"],
+    "Aliases": ["Version1.1-Deprecated"],
     "Deprecited": true,
     "Examples": [
       {
@@ -780,7 +780,7 @@
     ]
   },
   {
-    "Name": "steveneasteregg",
+    "Name": "fun.easteregg.steven",
     "Tags": ["fun", "easteregg"],
     "Aliases": ["steveneasteregg"],
     "Deprecated": false,
