@@ -35,7 +35,9 @@ public sealed class V1RecognizerEngine
             {
                 // Always recompute example tokens (ignore tokens in JSON)
                 foreach (var ex in intent.Examples)
-                    ex.Tokens = _tokenizer.Tokenize(ex.Utterance, filterStopWords: true);
+                    if (ex.Tokens is null || ex.Tokens.Count == 0)
+                        ex.Tokens = _tokenizer.Tokenize(ex.Utterance, filterStopWords: true)
+                                            .ToArray();
             }
 
             _intents = intents;
@@ -63,7 +65,8 @@ public sealed class V1RecognizerEngine
         {
             foreach (var ex in intent.Examples)
             {
-                var exSet = (ex.Tokens ?? new()).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var exSeq = ex.Tokens ?? Array.Empty<string>();
+                var exSet = exSeq.ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var inter = exSet.Intersect(userSet).Count();
                 var union = exSet.Union(userSet).Count();
                 double j = union == 0 ? 0 : (double)inter / union;
