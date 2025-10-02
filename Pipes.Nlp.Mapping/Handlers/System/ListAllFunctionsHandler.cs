@@ -1,3 +1,4 @@
+// Pipes.Nlp.Mapping/Handlers/System/ListAllFunctionsHandler.cs
 using System.Text;
 using System.Text.Json;
 using Dansby.Shared;
@@ -9,13 +10,16 @@ public sealed class ListAllFunctionsHandler : IIntentHandler
 {
     public string Name => "sys.status.listallfunctions";
 
-    private readonly IHandlerRegistry _registry;
+    private readonly IEnumerable<IIntentHandler> _handlers; // ← inject all handlers
     private readonly IIntentQueue _queue;
     private readonly ILogger<ListAllFunctionsHandler> _log;
 
-    public ListAllFunctionsHandler(IHandlerRegistry registry, IIntentQueue queue, ILogger<ListAllFunctionsHandler> log)
+    public ListAllFunctionsHandler(
+        IEnumerable<IIntentHandler> handlers,
+        IIntentQueue queue,
+        ILogger<ListAllFunctionsHandler> log)
     {
-        _registry = registry;
+        _handlers = handlers;
         _queue = queue;
         _log = log;
     }
@@ -23,42 +27,46 @@ public sealed class ListAllFunctionsHandler : IIntentHandler
     public Task<HandlerResult> HandleAsync(JsonElement payload, string corr, CancellationToken ct)
     {
         // optional filters
-        string? domain = TryGetString(payload, "domain");         // e.g. "chat"
-        string? starts = TryGetString(payload, "startsWith");     // e.g. "chat.name."
+        string? domain = TryGetString(payload, "domain");     // e.g. "chat"
+        string? starts = TryGetString(payload, "startsWith"); // e.g. "chat.name."
         int page = Math.Max(1, TryGetInt(payload, "page") ?? 1);
         int pageSize = Math.Clamp(TryGetInt(payload, "pageSize") ?? 100, 1, 500);
 
-        var all = _registry.Intents();
+        // collect names from all registered handlers
+        var allNames = _handlers
+            .Select(h => h.Name)
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Distinct(StringComparer.OrdinalIgnoreCase);
 
-        // filter
-        IEnumerable<string> q = all;
+        IEnumerable<string> q = allNames;
+
         if (!string.IsNullOrWhiteSpace(domain))
             q = q.Where(n => n.StartsWith(domain + ".", StringComparison.OrdinalIgnoreCase));
+
         if (!string.IsNullOrWhiteSpace(starts))
             q = q.Where(n => n.StartsWith(starts, StringComparison.OrdinalIgnoreCase));
 
         var filtered = q.OrderBy(n => n, StringComparer.OrdinalIgnoreCase).ToList();
 
-        // paginate
+        // pagination
         int total = filtered.Count;
         int skip = (page - 1) * pageSize;
         var items = filtered.Skip(skip).Take(pageSize).ToArray();
 
-        // pretty text for ui
+        // pretty text for UI
         var sb = new StringBuilder();
         if (!string.IsNullOrWhiteSpace(domain))
             sb.AppendLine($"Functions (domain: {domain}) — {items.Length}/{total}:");
         else
             sb.AppendLine($"Functions — {items.Length}/{total}:");
-
-        foreach (var name in items)
-            sb.AppendLine($"• {name}");
-
+        foreach (var name in items) sb.AppendLine($"• {name}");
         if (skip + items.Length < total)
             sb.AppendLine($"…and {total - (skip + items.Length)} more (page {page + 1})");
 
-        // enqueue a UI message (to keep parity with ReplyHandler behavior)
-        var sayPayload = JsonSerializer.Deserialize<JsonElement>(JsonSerializer.Serialize(new { text = sb.ToString().TrimEnd() }));
+        // enqueue UI message
+        var sayPayload = JsonSerializer.Deserialize<JsonElement>(
+            JsonSerializer.Serialize(new { text = sb.ToString().TrimEnd() })
+        );
         _queue.Enqueue(new Envelope(
             Id: Guid.NewGuid().ToString(),
             Ts: DateTimeOffset.UtcNow,
