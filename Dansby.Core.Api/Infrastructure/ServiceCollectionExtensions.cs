@@ -15,14 +15,20 @@ public static class ServiceCollectionExtensions
         var handlerType = typeof(IIntentHandler); // Referencing the interface in shared
         var manualAttr  = typeof(ManualRegistrationAttribute);
 
-        foreach (var asm in asms)
-        foreach (var type in asm.GetTypes().Where(x => handlerType.IsAssignableFrom(x) && !x.IsAbstract && !x.IsInterface))
-        {
-            if (type.GetCustomAttribute(manualAttr) != null)
-                continue; // skip: we’ll register these manually (e.g., ReplyHandler instances)
+        int added = 0, skipped = 0;
 
-            services.AddSingleton(typeof(IIntentHandler), type);
-        }
+        foreach (var asm in asms)
+            foreach (var type in asm.GetTypes()
+                .Where(x => handlerType.IsAssignableFrom(x) && !x.IsAbstract && !x.IsInterface))
+            {
+                if (type.GetCustomAttribute(manualAttr) != null)
+                {
+                    skipped++;
+                    continue; // skip: we’ll register these manually (e.g., ReplyHandler instances)
+                }
+                services.AddSingleton(typeof(IIntentHandler), type);
+                added++;
+            }
         return services;
     }
 }

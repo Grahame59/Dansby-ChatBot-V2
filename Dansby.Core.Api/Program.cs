@@ -68,6 +68,9 @@ internal class Program
             "chat.name.confirm","chat.name.spelling","chat.name.asked","fun.easteregg.steven",
             "weather.forecast","weather.temperature",
             "sys.time.now","sys.time.date","sys.time.dayofweek"
+
+            // Unregistered intents:
+            // #1. sys.status.listallfunctions
         };
 
         foreach (var intent in replyIntents)
