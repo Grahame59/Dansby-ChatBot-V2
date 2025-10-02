@@ -32,7 +32,9 @@ public sealed class V1Tokenizer : ITokenizer
                           .Where(t => !string.IsNullOrWhiteSpace(t))
                           .ToArray();
 
-        if (!filterStopWords) return raw;
+        // 3.5) Keep very short queries intact
+        if (!filterStopWords || raw.Length <= 3)
+            return raw;
 
         // 4) filter stopwords
         var filtered = raw.Where(t => !StopWords.En.Contains(t)).ToArray();

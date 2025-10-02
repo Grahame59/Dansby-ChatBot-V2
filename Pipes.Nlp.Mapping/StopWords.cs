@@ -8,8 +8,8 @@ public static class StopWords
     public static readonly ImmutableHashSet<string> En = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         // articles, pronouns, auxiliaries, preps, misc
-        "a","an","the","and","or","but","so",
-        "i","you","he","she","it","we","they","me","him","her","us","them",
+        "a","an","the","and","or","but","so", //"is"
+        "i","you","he","she","it","we","they","me","him","her","us","them", //"your",
         "my","his","her","its","our","their",
         "am","are","was","were","be","been","being",
         "do","does","did","doing",
