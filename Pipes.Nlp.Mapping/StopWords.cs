@@ -10,8 +10,8 @@ public static class StopWords
         // articles, pronouns, auxiliaries, preps, misc
         "a","an","the","and","or","but","so",
         "i","you","he","she","it","we","they","me","him","her","us","them",
-        "my","your","his","her","its","our","their",
-        "is","am","are","was","were","be","been","being",
+        "my","his","her","its","our","their",
+        "am","are","was","were","be","been","being",
         "do","does","did","doing",
         "have","has","had","having",
         "can","could","may","might","shall","should","will","would","must",
