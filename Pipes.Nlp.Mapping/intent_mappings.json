@@ -654,6 +654,15 @@
           "fav",
           "color"
         ]
+      },
+      {
+        "Utterance": "whats ur fav color",
+        "Tokens":[
+          "whats",
+          "ur",
+          "fav",
+          "color"
+        ]
       }
     ]
   },
