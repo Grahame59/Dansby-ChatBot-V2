@@ -32,7 +32,7 @@ public sealed class NlpRouteHandler : IIntentHandler
         // #2.6 Unique Case - Zebra Printer Parser
         // Pattern for Parsing Below:
         // [utterance]  [separator]  [label data]
-        
+
         if (intent == "zebra.print.simple")
         {
             // Allowed parsing symbols
@@ -66,7 +66,7 @@ public sealed class NlpRouteHandler : IIntentHandler
             {
                 // No separator found → user did not follow the format
                 // This will propagate to printer handler as BAD_INPUT
-                // (We let the printer handler respond with the standard error)
+                // (Let the printer handler respond with the standard error)
             }
         }
 

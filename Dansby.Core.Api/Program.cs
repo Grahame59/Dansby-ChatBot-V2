@@ -49,14 +49,6 @@ internal class Program
             o.Window = TimeSpan.FromSeconds(10); // per 10 seconds
         }));
 
-        // Responses JSON map
-        builder.Services.AddSingleton<Pipes.Nlp.Mapping.Responses.IResponseMap>(sp =>
-        {
-            var env = sp.GetRequiredService<IHostEnvironment>();
-            var path = Path.Combine(env.ContentRootPath, "response_mappings.json");
-            return new Pipes.Nlp.Mapping.Responses.ResponseMap(path);
-        });
-
         // Lightweight sink for "ui.out.say"
         builder.Services.AddSingleton<Dansby.Shared.IIntentHandler, Pipes.Nlp.Mapping.UiSayLogHandler>();
 
@@ -116,16 +108,48 @@ internal class Program
             if (handler is null)
                 return Results.BadRequest(new { error = $"no handler for recognized intent '{intent}'" });
 
-            // Call the handler directly (no queue); pass text so ReplyHandler can format/use it later if needed
-            var payload = JsonSerializer.Deserialize<JsonElement>(JsonSerializer.Serialize(new { text }));
-            var corr = Guid.NewGuid().ToString();
+            // Build payload depending on intent
+            JsonElement payload;
 
+            if (string.Equals(intent, "zebra.print.simple", StringComparison.OrdinalIgnoreCase))
+            {
+                // [utterance] [separator] [label data]
+                string rawText = text;
+                string[] separators = [":", "-"];
+
+                int pos = -1;
+                string? usedSep = null;
+
+                foreach (var sep in separators)
+                {
+                    var i = rawText.IndexOf(sep, StringComparison.OrdinalIgnoreCase);
+                    if (i >= 0 && (pos == -1 || i < pos))
+                    {
+                        pos = i;
+                        usedSep = sep;
+                    }
+                }
+
+                string labelText = string.Empty;
+                if (pos >= 0 && usedSep is not null)
+                {
+                    labelText = rawText[(pos + usedSep.Length)..].Trim();
+                }
+
+                payload = JsonSerializer.SerializeToElement(new { labelText });
+            }
+            else
+            {
+                // Default behavior for normal chat intents
+                payload = JsonSerializer.SerializeToElement(new { text });
+            }
+
+            var corr = Guid.NewGuid().ToString();
             var res = await handler.HandleAsync(payload, corr, ct);
 
             if (!res.Ok)
                 return Results.BadRequest(new { error = res.ErrorCode, message = res.Message, intent });
 
-            // ReplyHandler returns { intent, reply }; we just forward res.Data so the console can extract it.
             return Results.Json(new { intent, result = res.Data });
         })
         .RequireRateLimiting("intents");

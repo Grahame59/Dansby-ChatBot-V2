@@ -1348,6 +1348,27 @@
     "Name": "zebra.print.simple",
     "Tags": ["system", "functional", "information"],
     "Deprecated": false,
+    "Slots": {
+    "labelText": 
+    {
+      "Kind": "TextAfter",
+      "Triggers": [
+        "print a label",
+        "print this label",
+        "print a label for me",
+        "print this on a label",
+        "print this for me",
+        "print label",
+        "print a label:",
+        "label:",
+        "print this label for me",
+        "can u print this for me",
+        "can you print this for me",
+        "print a label from the zebra printer",
+        "print this on a label"
+      ]
+    }
+  },
     "Examples": 
     [
       {
@@ -1357,7 +1378,11 @@
         ]
       },
       {
-        "Utterance": "Can u print this for me",
+        "Utterance": "can u print this for me",
+        "Tokens": ["can", "u", "print", "this", "for", "me"]
+      },
+      {
+        "Utterance": "can you print this for me",
         "Tokens": ["can", "you", "print", "this", "for", "me"]
       },
       {
