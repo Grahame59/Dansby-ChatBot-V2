@@ -28,7 +28,7 @@ public sealed class ZebraPrintSimpleHandler : IIntentHandler
         // 1) Validate payload.labelText
         if (!payload.TryGetProperty("labelText", out var lt) || lt.ValueKind != JsonValueKind.String)
         {
-            return Task.FromResult(HandlerResult.Fail("BAD_INPUT", "payload.labeltext (string) required."));
+            return HandlerResult.Fail("BAD_INPUT", "payload.labeltext (string) required.");
         }
 
         // Extract String When Successfully Validated
