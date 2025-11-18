@@ -22,3 +22,23 @@ public sealed record HandlerResult(
     public static HandlerResult Fail(string code, string message, bool log = true, object? data = null)
         => new(false, code, message, data);
 }
+
+public static class EnvelopeFactory
+{
+    public static Envelope ForIntent(
+        string intent,
+        object payloadObj,
+        string corr,
+        int priority = 4)
+    {
+        var json = JsonSerializer.SerializeToElement(payloadObj);
+        return new Envelope(
+            Id: Guid.NewGuid().ToString(),
+            Ts: DateTimeOffset.UtcNow,
+            Intent: intent,
+            Priority: priority,
+            CorrelationId: corr,
+            Payload: json
+        );
+    }
+}

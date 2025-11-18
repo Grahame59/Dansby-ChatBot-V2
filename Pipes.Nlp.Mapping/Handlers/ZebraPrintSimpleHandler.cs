@@ -8,8 +8,23 @@ using Microsoft.Extensions.Logging;
 namespace Pipes.Devices.ZebraPrinter;
 
 /// <summary>
-/// Version 0.1 handler that takes a simple label text payload
-/// and sends it to the Zebra ZD410 as ZPL.
+/// Intent handler for <c>zebra.print.simple</c>.
+///
+/// This small-pipe handler accepts a payload containing <c>labelText</c>,
+/// converts it into ZPL, and sends it to the Zebra ZD410 printer via the
+/// server-side <c>lp -d zebra1</c> queue.  
+///
+/// On completion, the handler does not directly return a chat response.
+/// Instead, it repackages the result into a follow-up envelope and enqueues it:
+///
+/// • On success → emits <c>zebra.print.success</c>  
+/// • On failure → emits <c>zebra.print.failed</c>  
+///
+/// These routed intents allow the normal response pipeline (response_mappings)
+/// to handle user-facing acknowledgements or error instructions, maintaining
+/// the standard Dansby conversational flow.
+///
+/// Version 0.1 — minimal formatting, single-field label printing.
 /// </summary>
 public sealed class ZebraPrintSimpleHandler : IIntentHandler
 {
@@ -17,10 +32,12 @@ public sealed class ZebraPrintSimpleHandler : IIntentHandler
 
     // Dependency Injection
     private readonly ILogger<ZebraPrintSimpleHandler> _log;
+    private readonly IIntentQueue _queue;
 
-    public ZebraPrintSimpleHandler(ILogger<ZebraPrintSimpleHandler> log)
+    public ZebraPrintSimpleHandler(ILogger<ZebraPrintSimpleHandler> log, IIntentQueue queue)
     {
         _log = log;
+        _queue = queue;
     }
 
     public async Task<HandlerResult> HandleAsync(JsonElement payload, string corr, CancellationToken ct)
@@ -88,13 +105,16 @@ public sealed class ZebraPrintSimpleHandler : IIntentHandler
                     corr, exitCode, stdout
                 );
 
-                return HandlerResult.RouteTo("zebra.print.success", new
-                {
-                    labelText,
-                    exitCode,
-                    stdout,
-                    stderr
-                });
+                var successEnv = EnvelopeFactory.ForIntent(
+                    intent: "zebra.print.success",
+                    payloadObj: new { labelText, exitCode, stdout },
+                    corr: corr
+                );
+
+                _queue.Enqueue(successEnv);
+
+                return HandlerResult.Success(new { printed = true });
+
             }
             else
             {
@@ -103,10 +123,16 @@ public sealed class ZebraPrintSimpleHandler : IIntentHandler
                     corr, exitCode, stderr
                 );
 
-                return HandlerResult.RouteTo("zebra.print.badinput", new
-                {
-                    reason = "missing_label_formatting"
-                });
+                var failEnv = EnvelopeFactory.ForIntent(
+                    intent: "zebra.print.failed",
+                    payloadObj: new { labelText, stderr, exitCode },
+                    corr: corr
+                );
+
+                _queue.Enqueue(failEnv);
+
+                return HandlerResult.Fail("PRINT_FAILED", stderr);
+
             }
         }
         catch (Exception ex)
