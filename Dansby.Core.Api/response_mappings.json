@@ -139,12 +139,15 @@
   "sys.time.dayofweek": [
     "hmmm, seems as if the day of week handler didn't resolve properly in routing... Contact an Admin please."
   ],
-  "zebra.print.simple": [
+  "zebra.print.success": [
     "Okay, printing your label now!",
     "Working on the label right now.",
     "I'll get right to it!",
     "Your label is being printed",
     "Sending that over to the Zebra printer now.",
     "Zebra Printer Activated!"
+  ],
+  "zebra.print.fail": [
+    "To print a label, use ':' or '-' Like this: print a label: Hello World"
   ]
 }

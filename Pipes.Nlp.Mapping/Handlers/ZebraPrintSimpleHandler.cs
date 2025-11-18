@@ -88,9 +88,8 @@ public sealed class ZebraPrintSimpleHandler : IIntentHandler
                     corr, exitCode, stdout
                 );
 
-                return HandlerResult.Success(new
+                return HandlerResult.RouteTo("zebra.print.success", new
                 {
-                    printed = true,
                     labelText,
                     exitCode,
                     stdout,
@@ -104,10 +103,10 @@ public sealed class ZebraPrintSimpleHandler : IIntentHandler
                     corr, exitCode, stderr
                 );
 
-                return HandlerResult.Fail(
-                    "PRINT_FAILED",
-                    $"lp exited with code {exitCode}: {stderr}"
-                );
+                return HandlerResult.RouteTo("zebra.print.badinput", new
+                {
+                    reason = "missing_label_formatting"
+                });
             }
         }
         catch (Exception ex)

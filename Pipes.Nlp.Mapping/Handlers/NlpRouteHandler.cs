@@ -26,6 +26,50 @@ public sealed class NlpRouteHandler : IIntentHandler
         // #2. Run Recognizer (pure CPU work, no I/O needed here)
         var (intent, score, slots, domain) = _recognizer.Recognize(t.GetString() ?? "");
 
+        // #2.5 Extract Raw text
+        var rawText = t.GetString() ?? "";
+
+        // #2.6 Unique Case - Zebra Printer Parser
+        // Pattern for Parsing Below:
+        // [utterance]  [separator]  [label data]
+        
+        if (intent == "zebra.print.simple")
+        {
+            // Allowed parsing symbols
+            string[] separators = [":", "-"];
+
+            // Find the FIRST symbol that appears after the utterance
+            int pos = -1;
+            string? usedSep = null;
+
+            foreach (var sep in separators)
+            {
+                var i = rawText.IndexOf(sep, StringComparison.OrdinalIgnoreCase);
+                if (i >= 0 && (pos == -1 || i < pos))
+                {
+                    pos = i;
+                    usedSep = sep;
+                }
+            }
+
+            if (pos >= 0 && usedSep != null)
+            {
+                // Extract everything AFTER the separator
+                string label = rawText[(pos + usedSep.Length)..].Trim();
+
+                if (!string.IsNullOrWhiteSpace(label))
+                {
+                    slots["labelText"] = label;
+                }
+            }
+            else
+            {
+                // No separator found → user did not follow the format
+                // This will propagate to printer handler as BAD_INPUT
+                // (We let the printer handler respond with the standard error)
+            }
+        }
+
         // #3. Build the next payload from the recognized slots
         //     slots is Dictionary<string,string>; It then converts to JsonElement. 
         var nextPayload = JsonSerializer.Deserialize<JsonElement>(JsonSerializer.Serialize(slots));
