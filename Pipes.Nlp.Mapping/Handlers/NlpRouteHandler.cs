@@ -3,11 +3,16 @@ using Dansby.Shared;
 
 namespace Pipes.Nlp.Mapping;
 
+    /// <summary>
+    /// This Class <c>NlpRouteHandler</c> is essentially the bridge between raw text and 'actual intent handlers'.
+    /// NlpRouteHandler never actually “does” the work like printing, telling time, etc...
+    /// It delegates by dropping a new envelope into IIntentQueue
+    /// </summary>
 public sealed class NlpRouteHandler : IIntentHandler
 {
     // The Intent name, ("nlp.route"), this handler consumes
     public string Name => "nlp.route";
-    private readonly ITextRecognizer _recognizer;
+    private readonly ITextRecognizer _recognizer; // This is the NLP 'Brain' (The Old Jaccard Recognizer)
     private readonly IIntentQueue _queue; // Shared queue to push follow-up work
 
     public NlpRouteHandler(ITextRecognizer r, IIntentQueue q) { _recognizer = r; _queue = q; }

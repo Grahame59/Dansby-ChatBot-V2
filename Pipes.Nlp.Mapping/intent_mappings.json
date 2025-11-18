@@ -1343,5 +1343,35 @@
         ]
       }
     ]
+  },
+  {
+    "Name": "zebra.print.simple",
+    "Tags": ["system", "functional", "information"],
+    "Deprecated": false,
+    "Examples": 
+    [
+      {
+        "Utterance": "print a label for me",
+        "Tokens": [
+          "print", "a", "label", "for", "me"
+        ]
+      },
+      {
+        "Utterance": "Can u print this for me",
+        "Tokens": ["can", "you", "print", "this", "for", "me"]
+      },
+      {
+        "Utterance": "print this label",
+        "Tokens": ["print", "this", "label"]
+      },
+      {
+        "Utterance": "print a label from the zebra printer",
+        "Tokens": ["print", "a", "label", "from", "the", "zebra", "printer"]
+      },
+      {
+        "Utterance": "print this on a label",
+        "Tokens": ["print", "this", "on", "a", "label"]
+      }
+    ]
   }
 ]
