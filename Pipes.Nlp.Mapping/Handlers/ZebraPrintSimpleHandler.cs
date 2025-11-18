@@ -23,7 +23,7 @@ public sealed class ZebraPrintSimpleHandler : IIntentHandler
         _log = log;
     }
 
-    public Task<HandlerResult> HandleAsync(JsonElement payload, string corr, CancellationToken ct)
+    public async Task<HandlerResult> HandleAsync(JsonElement payload, string corr, CancellationToken ct)
     {
         // 1) Validate payload.labelText
         if (!payload.TryGetProperty("labelText", out var lt) || lt.ValueKind != JsonValueKind.String)
