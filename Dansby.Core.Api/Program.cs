@@ -85,6 +85,18 @@ internal class Program
         app.UseStaticFiles();   // serves files from wwwroot
         app.UseRateLimiter();
 
+        // Debug endpoint for zebra printer payload
+        app.MapPost("/debug/zebra/preview", async (
+        ZebraPrintMailerPreviewHandler handler,
+        JsonElement payload,
+        CancellationToken ct) =>
+        {
+            // payload here is the *handler payload* (not an envelope)
+            var corr = Guid.NewGuid().ToString("n");
+            var result = await handler.HandleAsync(payload, corr, ct);
+            return Results.Json(result);
+        });
+
         // sync debug endpoint that does the full path inline (recognize → pick reply → return it)
         app.MapPost("/debug/respond", async (
             HttpRequest http,
