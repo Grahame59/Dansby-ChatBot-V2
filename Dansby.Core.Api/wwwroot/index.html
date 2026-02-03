@@ -16,13 +16,27 @@
 <h1>Dansby V2.0.0 Console</h1>
 
 <input id = "apiKey" placeholder = "X-Api-Key" style = "width:100%"><br><br>
-<textarea id = "text" rows = "3" style = "width:100%"></textarea>
+
+<!-- NEW: CSV file picker + helpers -->
+<div class="row">
+  <input id="csvFile" type="file" accept=".csv,text/csv" />
+  <button id="loadCsv">Load CSV Into JSON</button>
+  <button id="clearText">Clear</button>
+</div>
+
+<textarea id = "text" rows = "14" style = "width:100%"></textarea>
 
 <div class = "row">
   <button id = "rec">Recognize</button>
   <button id = "route">Route</button>
   <button id = "respond">Respond</button>
   <button id = "debugHandle">Debug Handle</button>
+</div>
+
+<!-- NEW: quick toggles for printing -->
+<div class="row">
+  <button id="setPreview">Set Preview (doPrint:false)</button>
+  <button id="setPrint">Set Print (doPrint:true)</button>
 </div>
 
 <div id = "prettyReply" class = "reply" style = "display:none"></div>
@@ -149,6 +163,71 @@
     }
   }
 
+  // NEW: Build a default zebra mailer JSON envelope from csvText
+  function buildMailerJson(csvText, doPrint)
+  {
+    return {
+      intent: "zebra.print.mailer.csv",
+      payload: {
+        csvText: csvText,
+        hasHeader: true,
+        printReturnLabel: true,
+        splitReturnToSeparateLabel: false,
+        maxLabels: 999,
+        doPrint: !!doPrint
+      }
+    };
+  }
+
+  // NEW: Try to update doPrint in current JSON text (best-effort)
+  function setDoPrintFlag(flag)
+  {
+    let obj;
+    try 
+    {
+      obj = JSON.parse(el('text').value);
+    } catch 
+    {
+      showRaw("JSON parse failed. Load CSV into JSON first (or paste valid JSON).");
+      return;
+    }
+
+    if (!obj || typeof obj !== "object")
+      return;
+
+    if (!obj.payload || typeof obj.payload !== "object")
+      obj.payload = {};
+
+    obj.payload.doPrint = !!flag;
+    el('text').value = JSON.stringify(obj, null, 2);
+  }
+
+  // NEW: Read CSV file and load JSON into textarea
+  async function loadCsvToJson()
+  {
+    const file = el('csvFile').files?.[0];
+    if (!file)
+    {
+      showRaw("Pick a .csv file first.");
+      return;
+    }
+
+    const csvText = await file.text();
+
+    // Default: preview mode
+    const obj = buildMailerJson(csvText, false);
+    el('text').value = JSON.stringify(obj, null, 2);
+    showRaw("CSV loaded into JSON. Click Debug Handle to preview. Use Set Print to switch doPrint=true.");
+  }
+
+  // NEW: Buttons for csv utilities
+  el('loadCsv').onclick = () => loadCsvToJson();
+  el('clearText').onclick = () => { el('text').value = ""; showReply(""); showRaw(""); };
+
+  el('setPreview').onclick = () => setDoPrintFlag(false);
+  el('setPrint').onclick   = () => setDoPrintFlag(true);
+
+  // Debug Handle button posts the JSON envelope directly to /debug/handle
   el('debugHandle').onclick = () => 
   {
     let obj;
@@ -171,5 +250,4 @@
 
   // Respond (extract a human-friendly reply)
   el('respond').onclick = () => post('/debug/respond', { text: val('text') });
-  
 </script>
