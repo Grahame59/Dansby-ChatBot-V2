@@ -22,7 +22,7 @@
   <button id = "rec">Recognize</button>
   <button id = "route">Route</button>
   <button id = "respond">Respond</button>
-  <button id="intent">Send Intent JSON</button>
+  <button id = "debugHandle">Debug Handle</button>
 </div>
 
 <div id = "prettyReply" class = "reply" style = "display:none"></div>
@@ -149,26 +149,18 @@
     }
   }
 
-  el('intent').onclick = () => 
+  el('debugHandle').onclick = () => 
   {
-    showReply('');
-    showRaw('');
-
-    let body;
+    let obj;
     try 
     {
-      body = JSON.parse(el('text').value);
+      obj = JSON.parse(el('text').value);
     } catch (e) 
     {
-      showRaw(
-        "Textarea is not valid JSON.\n" +
-        "Paste a full /intents JSON body.\n\n" +
-        "Error: " + (e?.message || e)
-      );
+      showRaw("Invalid JSON: " + e.message);
       return;
     }
-
-    post('/intents', body);
+    post('/debug/handle', obj);
   };
 
   // Buttons

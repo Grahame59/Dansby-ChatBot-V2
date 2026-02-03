@@ -52,6 +52,11 @@ internal class Program
         // Lightweight sink for "ui.out.say"
         builder.Services.AddSingleton<Dansby.Shared.IIntentHandler, Pipes.Nlp.Mapping.UiSayLogHandler>();
 
+        // Zebra printer handlers (explicit registration)
+        builder.Services.AddSingleton<Dansby.Shared.IIntentHandler, Pipes.Devices.ZebraPrinter.ZebraPrintSimpleHandler>();
+        builder.Services.AddSingleton<Dansby.Shared.IIntentHandler, Pipes.Devices.ZebraPrinter.ZebraPrintMailerPreviewHandler>();
+        builder.Services.AddSingleton<Dansby.Shared.IIntentHandler, Pipes.Devices.ZebraPrinter.ZebraPrintMailerFromCsvHandler>();
+
         string[] replyIntents =
         {
             "chat.greet","chat.farewell","chat.help","chat.howareyou","sys.status.current",
@@ -85,17 +90,44 @@ internal class Program
         app.UseStaticFiles();   // serves files from wwwroot
         app.UseRateLimiter();
 
-        // Debug endpoint for zebra printer payload
-        app.MapPost("/debug/zebra/preview", async (
-        ZebraPrintMailerPreviewHandler handler,
-        JsonElement payload,
-        CancellationToken ct) =>
+        // Generic sync debug endpoint that runs ANY handler inline (intent + payload) and returns result
+        app.MapPost("/debug/handle", async (
+            HttpRequest http,
+            IHandlerRegistry reg,
+            JsonElement body,
+            CancellationToken ct) =>
         {
-            // payload here is the *handler payload* (not an envelope)
+            var configuredKey = app.Configuration["DANSBY_API_KEY"];
+            if (string.IsNullOrEmpty(configuredKey) ||
+                !http.Headers.TryGetValue("X-Api-Key", out var key) || key != configuredKey)
+                return Results.Unauthorized();
+
+            if (!body.TryGetProperty("intent", out var iEl) || iEl.ValueKind != JsonValueKind.String)
+                return Results.BadRequest(new { error = "body.intent (string) required" });
+
+            var intent = iEl.GetString() ?? "";
+            if (string.IsNullOrWhiteSpace(intent))
+                return Results.BadRequest(new { error = "body.intent cannot be empty" });
+
+            JsonElement payload;
+            if (body.TryGetProperty("payload", out var pEl) && pEl.ValueKind != JsonValueKind.Undefined)
+                payload = pEl;
+            else
+                payload = JsonDocument.Parse("{}").RootElement;
+
+            var handler = reg.Resolve(intent);
+            if (handler is null)
+                return Results.BadRequest(new { error = $"no handler registered for intent '{intent}'" });
+
             var corr = Guid.NewGuid().ToString("n");
-            var result = await handler.HandleAsync(payload, corr, ct);
-            return Results.Json(result);
-        });
+            var res = await handler.HandleAsync(payload, corr, ct);
+
+            if (!res.Ok)
+                return Results.BadRequest(new { error = res.ErrorCode, message = res.Message, intent, corr });
+
+            return Results.Json(new { intent, corr, result = res.Data });
+        })
+        .RequireRateLimiting("intents");
 
         // sync debug endpoint that does the full path inline (recognize → pick reply → return it)
         app.MapPost("/debug/respond", async (
