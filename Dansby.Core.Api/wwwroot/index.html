@@ -1,253 +1,136 @@
-<!-- index.html -->
-<!-- LAN-hosted test console for Dansby routing & replies -->
-
 <!doctype html>
-<meta charset="utf-8">
-<title>Dansby Console</title>
-<style>
-  body { font-family: system-ui; margin: 2rem; max-width: 720px }
-  pre { background: #111; color: #eee; padding: 1rem; border-radius: 8px; white-space: pre-wrap }
-  .row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .5rem }
-  .row > * { flex: 1 0 auto }
-  .reply { padding:.75rem 1rem; border:1px solid #ddd; border-radius:8px; background:#f9f9f9; margin:.5rem 0 }
-  .muted { opacity:.7; font-size:.9em }
-</style>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dansby Console</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">D</div>
+        <div>
+          <h1>Dansby</h1>
+          <p>Local command console</p>
+        </div>
+      </div>
 
-<h1>Dansby V2.0.0 Console</h1>
+      <div class="status-strip" aria-label="System status">
+        <span class="status-pill" id="healthStatus">Health: checking</span>
+        <span class="status-pill" id="keyStatus">Key: missing</span>
+        <span class="status-pill" id="requestStatus">Idle</span>
+      </div>
+    </header>
 
-<input id = "apiKey" placeholder = "X-Api-Key" style = "width:100%"><br><br>
+    <main class="dashboard">
+      <section class="command-panel" aria-labelledby="commandTitle">
+        <div class="panel-header">
+          <div>
+            <h2 id="commandTitle">Command</h2>
+            <p id="modeCaption">Respond returns the handler result immediately.</p>
+          </div>
+          <button class="ghost-button" id="clearInput" type="button">Clear</button>
+        </div>
 
-<!-- NEW: CSV file picker + helpers -->
-<div class="row">
-  <input id="csvFile" type="file" accept=".csv,text/csv" />
-  <button id="loadCsv">Load CSV Into JSON</button>
-  <button id="clearText">Clear</button>
-</div>
+        <label class="field-label" for="apiKey">API key</label>
+        <input id="apiKey" class="text-input" type="password" autocomplete="off" placeholder="X-Api-Key">
 
-<textarea id = "text" rows = "14" style = "width:100%"></textarea>
+        <div class="segmented" role="tablist" aria-label="Command mode">
+          <button class="segment active" data-mode="respond" type="button">Respond</button>
+          <button class="segment" data-mode="route" type="button">Route</button>
+          <button class="segment" data-mode="recognize" type="button">Recognize</button>
+          <button class="segment" data-mode="debug" type="button">Debug</button>
+        </div>
 
-<div class = "row">
-  <button id = "rec">Recognize</button>
-  <button id = "route">Route</button>
-  <button id = "respond">Respond</button>
-  <button id = "debugHandle">Debug Handle</button>
-</div>
+        <label class="field-label" for="text">Input</label>
+        <textarea id="text" class="command-input" rows="12" spellcheck="true"></textarea>
 
-<!-- NEW: quick toggles for printing -->
-<div class="row">
-  <button id="setPreview">Set Preview (doPrint:false)</button>
-  <button id="setPrint">Set Print (doPrint:true)</button>
-</div>
+        <div class="action-row">
+          <button class="primary-button" id="runCommand" type="button">Respond</button>
+          <button class="secondary-button" id="copyRaw" type="button">Copy JSON</button>
+        </div>
+      </section>
 
-<div id = "prettyReply" class = "reply" style = "display:none"></div>
-<div class = "muted" id = "rawLabel" style = "display:none">Raw response</div>
-<pre id = "out"></pre>
+      <section class="output-panel" aria-labelledby="outputTitle">
+        <div class="panel-header">
+          <div>
+            <h2 id="outputTitle">Output</h2>
+            <p id="lastEndpoint">No request sent</p>
+          </div>
+          <button class="ghost-button" id="clearOutput" type="button">Clear</button>
+        </div>
 
-<script>
-  const el = id => document.getElementById(id);
-  const val = id => el(id).value.trim();
+        <div class="reply-box" id="prettyReply">Ready.</div>
 
-  // Best-effort extractor for a "reply" or "message" from various shapes.
-  function extractReply(obj) 
-  {
-    if (!obj || typeof obj !== 'object') return '';
+        <div class="raw-header">
+          <span>Raw JSON</span>
+          <span id="responseCode">--</span>
+        </div>
+        <pre id="out" class="raw-output">{}</pre>
+      </section>
 
-    // Common shapes to try, in order:
-    // 1) { reply: "..." } or { text: "..." }
-    if (typeof obj.reply === 'string') return obj.reply;
-    if (typeof obj.text === 'string') return obj.text;
-    if (typeof obj.message === 'string') return obj.message;
+      <section class="tool-panel" aria-labelledby="zebraTitle">
+        <div class="panel-header">
+          <div>
+            <h2 id="zebraTitle">Zebra</h2>
+            <p>Mailer CSV builder</p>
+          </div>
+          <span class="panel-badge">local</span>
+        </div>
 
-    // 2) envelope-ish: { result: { reply/text/... } }
-    if (obj.result) 
-    {
-      const r = extractReply(obj.result);
-      if (r) return r;
-    }
+        <input id="csvFile" class="file-input" type="file" accept=".csv,text/csv">
 
-    // 3) pipelines/handlers: { outputs: [{ text: ... }]} or { messages: [{ text: ... }]}
-    const arrays = ['outputs','messages','items','steps'];
-    for (const key of arrays) 
-    {
-      if (Array.isArray(obj[key])) 
-      {
-        for (const item of obj[key]) 
-        {
-          const r = extractReply(item);
-          if (r) return r;
-        }
-      }
-    }
+        <div class="toggle-row" role="group" aria-label="Print mode">
+          <button class="toggle active" id="setPreview" type="button">Preview</button>
+          <button class="toggle" id="setPrint" type="button">Print</button>
+        </div>
 
-    // 4) nested payloads: { data: {...} } / { payload: {...} }
-    if (obj.data) 
-    {
-      const r = extractReply(obj.data);
-      if (r) return r;
-    }
-    if (obj.payload) 
-    {
-      const r = extractReply(obj.payload);
-      if (r) return r;
-    }
+        <div class="action-row compact">
+          <button class="secondary-button" id="loadCsv" type="button">Load CSV</button>
+          <button class="ghost-button" id="debugTemplate" type="button">Template</button>
+        </div>
+      </section>
 
-    // 5) content-like: { content: "..." } or { content: [{ text: "..." }] }
-    if (typeof obj.content === 'string') return obj.content;
-    if (Array.isArray(obj.content)) 
-    {
-      for (const c of obj.content) 
-      {
-        const r = extractReply(c);
-        if (r) return r;
-      }
-    }
+      <section class="modules-panel" aria-labelledby="modulesTitle">
+        <div class="panel-header">
+          <div>
+            <h2 id="modulesTitle">Modules</h2>
+            <p>Roadmap surfaces</p>
+          </div>
+        </div>
 
-    return '';
-  }
+        <div class="module-grid">
+          <button class="module-tile" type="button" disabled>
+            <span>Plex</span>
+            <small>planned</small>
+          </button>
+          <button class="module-tile" type="button" disabled>
+            <span>RFID</span>
+            <small>planned</small>
+          </button>
+          <button class="module-tile" type="button" disabled>
+            <span>Cameras</span>
+            <small>planned</small>
+          </button>
+          <button class="module-tile" type="button" disabled>
+            <span>Backups</span>
+            <small>planned</small>
+          </button>
+          <button class="module-tile" type="button" disabled>
+            <span>Minecraft</span>
+            <small>planned</small>
+          </button>
+          <button class="module-tile" type="button" disabled>
+            <span>Pets</span>
+            <small>planned</small>
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
 
-  function showRaw(text) 
-  {
-    el('out').textContent = text;
-    el('rawLabel').style.display = text ? '' : 'none';
-  }
-
-  function showReply(reply) 
-  {
-    const box = el('prettyReply');
-    if (reply) 
-    {
-      box.textContent = reply;
-      box.style.display = '';
-    } else 
-    {
-      box.style.display = 'none';
-      box.textContent = '';
-    }
-  }
-
-  async function post(url, body) 
-  {
-    showReply('');
-    showRaw(''); // clear
-    try 
-    {
-      const r = await fetch(url, 
-      {
-        method: 'POST',
-        headers: 
-        {
-          'Content-Type': 'application/json',
-          'X-Api-Key': val('apiKey')
-        },
-        body: JSON.stringify(body)
-      });
-
-      const text = await r.text();
-
-      // Try JSON first
-      try 
-      {
-        const json = JSON.parse(text);
-        const reply = extractReply(json);
-        if (reply) showReply(reply);
-        showRaw(JSON.stringify(json, null, 2));
-      } catch 
-      {
-        // Not JSON — just show as text
-        showRaw(text || '(empty response)');
-      }
-    } catch (e) 
-    {
-      showReply('');
-      showRaw('Request failed: ' + (e?.message || e));
-    }
-  }
-
-  // NEW: Build a default zebra mailer JSON envelope from csvText
-  function buildMailerJson(csvText, doPrint)
-  {
-    return {
-      intent: "zebra.print.mailer.from_csv",
-      payload: {
-        csvText: csvText,
-        hasHeader: true,
-        printReturnLabel: true,
-        splitReturnToSeparateLabel: false,
-        maxLabels: 999,
-        doPrint: !!doPrint
-      }
-    };
-  }
-
-  // NEW: Try to update doPrint in current JSON text (best-effort)
-  function setDoPrintFlag(flag)
-  {
-    let obj;
-    try 
-    {
-      obj = JSON.parse(el('text').value);
-    } catch 
-    {
-      showRaw("JSON parse failed. Load CSV into JSON first (or paste valid JSON).");
-      return;
-    }
-
-    if (!obj || typeof obj !== "object")
-      return;
-
-    if (!obj.payload || typeof obj.payload !== "object")
-      obj.payload = {};
-
-    obj.payload.doPrint = !!flag;
-    el('text').value = JSON.stringify(obj, null, 2);
-  }
-
-  // NEW: Read CSV file and load JSON into textarea
-  async function loadCsvToJson()
-  {
-    const file = el('csvFile').files?.[0];
-    if (!file)
-    {
-      showRaw("Pick a .csv file first.");
-      return;
-    }
-
-    const csvText = await file.text();
-
-    // Default: preview mode
-    const obj = buildMailerJson(csvText, false);
-    el('text').value = JSON.stringify(obj, null, 2);
-    showRaw("CSV loaded into JSON. Click Debug Handle to preview. Use Set Print to switch doPrint=true.");
-  }
-
-  // NEW: Buttons for csv utilities
-  el('loadCsv').onclick = () => loadCsvToJson();
-  el('clearText').onclick = () => { el('text').value = ""; showReply(""); showRaw(""); };
-
-  el('setPreview').onclick = () => setDoPrintFlag(false);
-  el('setPrint').onclick   = () => setDoPrintFlag(true);
-
-  // Debug Handle button posts the JSON envelope directly to /debug/handle
-  el('debugHandle').onclick = () => 
-  {
-    let obj;
-    try 
-    {
-      obj = JSON.parse(el('text').value);
-    } catch (e) 
-    {
-      showRaw("Invalid JSON: " + e.message);
-      return;
-    }
-    post('/debug/handle', obj);
-  };
-
-  // Buttons
-  el('rec').onclick   = () => post('/debug/recognize', { text: val('text') });
-
-  // Your existing route (fire the router; shows raw response)
-  el('route').onclick = () => post('/intents', { intent: 'nlp.route', payload: { text: val('text') } });
-
-  // Respond (extract a human-friendly reply)
-  el('respond').onclick = () => post('/debug/respond', { text: val('text') });
-</script>
+  <script src="app.js"></script>
+</body>
+</html>
