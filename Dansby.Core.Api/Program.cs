@@ -90,18 +90,15 @@ internal class Program
         app.UseStaticFiles();   // serves files from wwwroot
         app.UseRateLimiter();
 
+        var protectedApi = app.MapGroup("")
+            .AddEndpointFilter(RequireApiKey);
+
         // Generic sync debug endpoint that runs ANY handler inline (intent + payload) and returns result
-        app.MapPost("/debug/handle", async (
-            HttpRequest http,
+        protectedApi.MapPost("/debug/handle", async (
             IHandlerRegistry reg,
             JsonElement body,
             CancellationToken ct) =>
         {
-            var configuredKey = app.Configuration["DANSBY_API_KEY"];
-            if (string.IsNullOrEmpty(configuredKey) ||
-                !http.Headers.TryGetValue("X-Api-Key", out var key) || key != configuredKey)
-                return Results.Unauthorized();
-
             if (!body.TryGetProperty("intent", out var iEl) || iEl.ValueKind != JsonValueKind.String)
                 return Results.BadRequest(new { error = "body.intent (string) required" });
 
@@ -130,18 +127,12 @@ internal class Program
         .RequireRateLimiting("intents");
 
         // sync debug endpoint that does the full path inline (recognize → pick reply → return it)
-        app.MapPost("/debug/respond", async (
-            HttpRequest http,
+        protectedApi.MapPost("/debug/respond", async (
             Pipes.Nlp.Mapping.ITextRecognizer rec,
             IHandlerRegistry reg,
             JsonElement body,
             CancellationToken ct) =>
         {
-            var configuredKey = app.Configuration["DANSBY_API_KEY"];
-            if (string.IsNullOrEmpty(configuredKey) ||
-                !http.Headers.TryGetValue("X-Api-Key", out var key) || key != configuredKey)
-                return Results.Unauthorized();
-
             if (!body.TryGetProperty("text", out var t) || t.ValueKind != JsonValueKind.String)
                 return Results.BadRequest(new { error = "body.text (string) required" });
 
@@ -199,25 +190,15 @@ internal class Program
         .RequireRateLimiting("intents");
 
         // Hot-Reload Endpoint for Responses
-        app.MapPost("/responses/reload", async (HttpRequest http, Pipes.Nlp.Mapping.Responses.IResponseMap map) =>
+        protectedApi.MapPost("/responses/reload", async (Pipes.Nlp.Mapping.Responses.IResponseMap map) =>
         {
-            var configuredKey = app.Configuration["DANSBY_API_KEY"];
-            if (string.IsNullOrEmpty(configuredKey) ||
-                !http.Headers.TryGetValue("X-Api-Key", out var key) || key != configuredKey)
-                return Results.Unauthorized();
-
             await map.ReloadAsync();
             return Results.Json(new { reloaded = true });
         })
         .RequireRateLimiting("intents");
 
-        app.MapPost("/debug/recognize", (HttpRequest http, Pipes.Nlp.Mapping.ITextRecognizer rec, JsonElement body) =>
+        protectedApi.MapPost("/debug/recognize", (Pipes.Nlp.Mapping.ITextRecognizer rec, JsonElement body) =>
         {
-            var configuredKey = app.Configuration["DANSBY_API_KEY"];
-            if (string.IsNullOrEmpty(configuredKey) ||
-                !http.Headers.TryGetValue("X-Api-Key", out var key) || key != configuredKey)
-                return Results.Unauthorized();
-
             if (!body.TryGetProperty("text", out var t) || t.ValueKind != JsonValueKind.String)
                 return Results.BadRequest(new { error = "body.text (string) required" });
 
@@ -231,7 +212,7 @@ internal class Program
         /// <summary>
         /// This /intents endpoint: 
         /// 
-        ///     - Checks the API key (Currently: superlongrandomvalue123) 
+        ///     - Uses the protected API filter to check the API key
         ///     - Validates the intent name exists
         ///     - Normalizes data and builds an Envelope
         ///     - Enqueues the Envelope onto the priority queue
@@ -239,17 +220,8 @@ internal class Program
         /// 
         /// </summary>
 
-        app.MapPost("/intents", (HttpRequest http, IntentRequest req, IIntentQueue queue, IHandlerRegistry reg) =>
+        protectedApi.MapPost("/intents", (IntentRequest req, IIntentQueue queue, IHandlerRegistry reg) =>
         {
-            // 1) API key check
-            var configuredKey = app.Configuration["DANSBY_API_KEY"];
-            if (string.IsNullOrEmpty(configuredKey) ||
-                !http.Headers.TryGetValue("X-Api-Key", out var key) ||
-                key != configuredKey)
-            {
-                return Results.Unauthorized();
-            }
-
             // 2) Basic validation
             if (string.IsNullOrWhiteSpace(req.Intent))
                 return Results.BadRequest(new { error = "intent required" });
@@ -274,6 +246,24 @@ internal class Program
         .RequireRateLimiting("intents");
 
         app.Run();
+    }
+
+    private static async ValueTask<object?> RequireApiKey(
+        EndpointFilterInvocationContext context,
+        EndpointFilterDelegate next)
+    {
+        var http = context.HttpContext;
+        var configuredKey = http.RequestServices
+            .GetRequiredService<IConfiguration>()["DANSBY_API_KEY"];
+
+        if (string.IsNullOrEmpty(configuredKey) ||
+            !http.Request.Headers.TryGetValue("X-Api-Key", out var key) ||
+            key != configuredKey)
+        {
+            return Results.Unauthorized();
+        }
+
+        return await next(context);
     }
 }
 
