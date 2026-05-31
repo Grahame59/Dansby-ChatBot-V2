@@ -147,7 +147,7 @@
     "Sending that over to the Zebra printer now.",
     "Zebra Printer Activated!"
   ],
-  "zebra.print.fail": [
+  "zebra.print.failed": [
     "To print a label, use ':' or '-' Like this: print a label: Hello World"
   ]
 }

@@ -1,26 +1,46 @@
-using System.Collections.Concurrent;
 using System.Text.Json;
-using Dansby.Shared;
-using Pipes.Nlp.Mapping;
-using Microsoft.AspNetCore.RateLimiting;
+using Dansby.Core.Api.Contracts;
 using Dansby.Core.Api.Infrastructure;
+using Dansby.Shared;
+using Microsoft.AspNetCore.RateLimiting;
+using Pipes.Nlp.Mapping;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.Logging.ClearProviders();
-        builder.Logging.AddSimpleConsole(o => { o.SingleLine = true; o.TimestampFormat = "HH:mm:ss "; });
 
-        // Dependency Injection: queue, registry, worker, handlers
+        ConfigureLogging(builder);
+        ConfigureServices(builder);
+        ConfigureRateLimiting(builder);
+
+        var app = builder.Build();
+
+        ConfigureMiddleware(app);
+        MapEndpoints(app);
+
+        app.Run();
+    }
+
+    private static void ConfigureLogging(WebApplicationBuilder builder)
+    {
+        builder.Logging.ClearProviders();
+        builder.Logging.AddSimpleConsole(o =>
+        {
+            o.SingleLine = true;
+            o.TimestampFormat = "HH:mm:ss ";
+        });
+    }
+
+    private static void ConfigureServices(WebApplicationBuilder builder)
+    {
         builder.Services.AddSingleton<IIntentQueue, InMemoryPriorityQueue>();
         builder.Services.AddSingleton<IHandlerRegistry, HandlerRegistry>();
 
-        // NLP services
-        builder.Services.AddSingleton<ITokenizer, V1Tokenizer>();     // bind interface → concrete
-        builder.Services.AddSingleton<V1RecognizerEngine>();          // engine
-        builder.Services.AddSingleton<ITextRecognizer, V1RecognizerAdapter>(); // adapter
+        builder.Services.AddSingleton<ITokenizer, V1Tokenizer>();
+        builder.Services.AddSingleton<V1RecognizerEngine>();
+        builder.Services.AddSingleton<ITextRecognizer, V1RecognizerAdapter>();
         builder.Services.AddSingleton<Pipes.Nlp.Mapping.Responses.IResponseMap>(sp =>
         {
             var env = sp.GetRequiredService<IHostEnvironment>();
@@ -28,335 +48,246 @@ internal class Program
             return new Pipes.Nlp.Mapping.Responses.ResponseMap(path);
         });
 
-        // Auto-Registry for Handlers
-        builder.Services.AddAllIntentHandlersFrom
-        (
-            typeof(Pipes.Nlp.Mapping.NlpRecognizeHandler).Assembly
-        // add more assemblies as more modules are added
-        );
+        builder.Services.AddAllIntentHandlersFrom(
+            typeof(Pipes.Nlp.Mapping.NlpRecognizeHandler).Assembly);
+
         builder.Services.AddHostedService<DispatcherWorker>();
 
-        // Enable Static Files + CORS 
         builder.Services.AddCors(o => o.AddPolicy("ui", p => p
-        .AllowAnyOrigin()
-        .AllowAnyHeader()
-        .AllowAnyMethod()));
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod()));
 
-        builder.Services.AddRateLimiter(_ => _
-        .AddFixedWindowLimiter("intents", o =>
-        {
-            o.PermitLimit = 20;                // up to 20 requests
-            o.Window = TimeSpan.FromSeconds(10); // per 10 seconds
-        }));
+        builder.Services.AddSingleton<IIntentHandler, UiSayLogHandler>();
+        builder.Services.AddSingleton<IIntentHandler, Pipes.Devices.ZebraPrinter.ZebraPrintSimpleHandler>();
+        builder.Services.AddSingleton<IIntentHandler, Pipes.Devices.ZebraPrinter.ZebraPrintMailerPreviewHandler>();
+        builder.Services.AddSingleton<IIntentHandler, Pipes.Devices.ZebraPrinter.ZebraPrintMailerFromCsvHandler>();
 
-        // Lightweight sink for "ui.out.say"
-        builder.Services.AddSingleton<Dansby.Shared.IIntentHandler, Pipes.Nlp.Mapping.UiSayLogHandler>();
+        RegisterReplyHandlers(builder.Services);
+    }
 
-        // Zebra printer handlers (explicit registration)
-        builder.Services.AddSingleton<Dansby.Shared.IIntentHandler, Pipes.Devices.ZebraPrinter.ZebraPrintSimpleHandler>();
-        builder.Services.AddSingleton<Dansby.Shared.IIntentHandler, Pipes.Devices.ZebraPrinter.ZebraPrintMailerPreviewHandler>();
-        builder.Services.AddSingleton<Dansby.Shared.IIntentHandler, Pipes.Devices.ZebraPrinter.ZebraPrintMailerFromCsvHandler>();
-
+    private static void RegisterReplyHandlers(IServiceCollection services)
+    {
         string[] replyIntents =
         {
-            "chat.greet","chat.farewell","chat.help","chat.howareyou","sys.status.current",
-            "sys.meta.creator","sys.meta.favoritecolor","chat.thanks.reply",
-            "chat.compliment","chat.love","chat.missedyou.reply",
-            "chat.name.confirm","chat.name.spelling","chat.name.asked","fun.easteregg.steven",
-            "weather.forecast","weather.temperature",
-            "sys.time.now","sys.time.date","sys.time.dayofweek"
-
-            // Unregistered intents:
-            // #1. sys.status.listallfunctions
+            "chat.greet", "chat.farewell", "chat.help", "chat.howareyou", "sys.status.current",
+            "sys.meta.creator", "sys.meta.favoritecolor", "chat.thanks.reply",
+            "chat.compliment", "chat.love", "chat.missedyou.reply",
+            "chat.name.confirm", "chat.name.spelling", "chat.name.asked", "fun.easteregg.steven",
+            "weather.forecast", "weather.temperature",
+            "sys.time.now", "sys.time.date", "sys.time.dayofweek"
         };
 
         foreach (var intent in replyIntents)
         {
-            builder.Services.AddSingleton<Dansby.Shared.IIntentHandler>(sp =>
-                new Pipes.Nlp.Mapping.ReplyHandler(
+            services.AddSingleton<IIntentHandler>(sp =>
+                new ReplyHandler(
                     handledIntent: intent,
                     responses: sp.GetRequiredService<Pipes.Nlp.Mapping.Responses.IResponseMap>(),
-                    queue:     sp.GetRequiredService<IIntentQueue>(),
-                    log:       sp.GetRequiredService<ILogger<Pipes.Nlp.Mapping.ReplyHandler>>()
-                )
-            );
+                    queue: sp.GetRequiredService<IIntentQueue>(),
+                    log: sp.GetRequiredService<ILogger<ReplyHandler>>()));
         }
+    }
 
-        var app = builder.Build();
+    private static void ConfigureRateLimiting(WebApplicationBuilder builder)
+    {
+        builder.Services.AddRateLimiter(_ => _
+            .AddFixedWindowLimiter("intents", o =>
+            {
+                o.PermitLimit = 20;
+                o.Window = TimeSpan.FromSeconds(10);
+            }));
+    }
 
-        // Tiny Web Console (LAN-Friendly)
+    private static void ConfigureMiddleware(WebApplication app)
+    {
         app.UseCors("ui");
-        app.UseDefaultFiles();  // serves index.html automatically if present
-        app.UseStaticFiles();   // serves files from wwwroot
+        app.UseDefaultFiles();
+        app.UseStaticFiles();
         app.UseRateLimiter();
+    }
 
+    private static void MapEndpoints(WebApplication app)
+    {
         var protectedApi = app.MapGroup("")
-            .AddEndpointFilter(RequireApiKey);
+            .AddEndpointFilter(ApiKeyEndpointFilter.RequireApiKey);
 
-        // Generic sync debug endpoint that runs ANY handler inline (intent + payload) and returns result
-        protectedApi.MapPost("/debug/handle", async (
-            IHandlerRegistry reg,
-            JsonElement body,
-            CancellationToken ct) =>
-        {
-            if (!body.TryGetProperty("intent", out var iEl) || iEl.ValueKind != JsonValueKind.String)
-                return Results.BadRequest(new { error = "body.intent (string) required" });
+        protectedApi.MapPost("/debug/handle", HandleDebugIntent)
+            .RequireRateLimiting("intents");
 
-            var intent = iEl.GetString() ?? "";
-            if (string.IsNullOrWhiteSpace(intent))
-                return Results.BadRequest(new { error = "body.intent cannot be empty" });
+        protectedApi.MapPost("/debug/respond", HandleDebugRespond)
+            .RequireRateLimiting("intents");
 
-            JsonElement payload;
-            if (body.TryGetProperty("payload", out var pEl) && pEl.ValueKind != JsonValueKind.Undefined)
-                payload = pEl;
-            else
-                payload = JsonDocument.Parse("{}").RootElement;
+        protectedApi.MapPost("/responses/reload", ReloadResponses)
+            .RequireRateLimiting("intents");
 
-            var handler = reg.Resolve(intent);
-            if (handler is null)
-                return Results.BadRequest(new { error = $"no handler registered for intent '{intent}'" });
+        protectedApi.MapPost("/debug/recognize", RecognizeText)
+            .RequireRateLimiting("intents");
 
-            var corr = Guid.NewGuid().ToString("n");
-            var res = await handler.HandleAsync(payload, corr, ct);
-
-            if (!res.Ok)
-                return Results.BadRequest(new { error = res.ErrorCode, message = res.Message, intent, corr });
-
-            return Results.Json(new { intent, corr, result = res.Data });
-        })
-        .RequireRateLimiting("intents");
-
-        // sync debug endpoint that does the full path inline (recognize → pick reply → return it)
-        protectedApi.MapPost("/debug/respond", async (
-            Pipes.Nlp.Mapping.ITextRecognizer rec,
-            IHandlerRegistry reg,
-            JsonElement body,
-            CancellationToken ct) =>
-        {
-            if (!body.TryGetProperty("text", out var t) || t.ValueKind != JsonValueKind.String)
-                return Results.BadRequest(new { error = "body.text (string) required" });
-
-            var text = t.GetString() ?? "";
-            var (intent, _, _, _) = rec.Recognize(text);
-
-            var handler = reg.Resolve(intent);
-            if (handler is null)
-                return Results.BadRequest(new { error = $"no handler for recognized intent '{intent}'" });
-
-            // Build payload depending on intent
-            JsonElement payload;
-
-            if (string.Equals(intent, "zebra.print.simple", StringComparison.OrdinalIgnoreCase))
-            {
-                // [utterance] [separator] [label data]
-                string rawText = text;
-                string[] separators = [":", "-"];
-
-                int pos = -1;
-                string? usedSep = null;
-
-                foreach (var sep in separators)
-                {
-                    var i = rawText.IndexOf(sep, StringComparison.OrdinalIgnoreCase);
-                    if (i >= 0 && (pos == -1 || i < pos))
-                    {
-                        pos = i;
-                        usedSep = sep;
-                    }
-                }
-
-                string labelText = string.Empty;
-                if (pos >= 0 && usedSep is not null)
-                {
-                    labelText = rawText[(pos + usedSep.Length)..].Trim();
-                }
-
-                payload = JsonSerializer.SerializeToElement(new { labelText });
-            }
-            else
-            {
-                // Default behavior for normal chat intents
-                payload = JsonSerializer.SerializeToElement(new { text });
-            }
-
-            var corr = Guid.NewGuid().ToString();
-            var res = await handler.HandleAsync(payload, corr, ct);
-
-            if (!res.Ok)
-                return Results.BadRequest(new { error = res.ErrorCode, message = res.Message, intent });
-
-            return Results.Json(new { intent, result = res.Data });
-        })
-        .RequireRateLimiting("intents");
-
-        // Hot-Reload Endpoint for Responses
-        protectedApi.MapPost("/responses/reload", async (Pipes.Nlp.Mapping.Responses.IResponseMap map) =>
-        {
-            await map.ReloadAsync();
-            return Results.Json(new { reloaded = true });
-        })
-        .RequireRateLimiting("intents");
-
-        protectedApi.MapPost("/debug/recognize", (Pipes.Nlp.Mapping.ITextRecognizer rec, JsonElement body) =>
-        {
-            if (!body.TryGetProperty("text", out var t) || t.ValueKind != JsonValueKind.String)
-                return Results.BadRequest(new { error = "body.text (string) required" });
-
-            var (intent, score, slots, domain) = rec.Recognize(t.GetString() ?? "");
-            return Results.Json(new { intent, score, domain, slots });
-        })
-        .RequireRateLimiting("intents"); 
+        protectedApi.MapPost("/intents", EnqueueIntent)
+            .RequireRateLimiting("intents");
 
         app.MapGet("/health", () => Results.Json(new { status = "ok" }));
-
-        /// <summary>
-        /// This /intents endpoint: 
-        /// 
-        ///     - Uses the protected API filter to check the API key
-        ///     - Validates the intent name exists
-        ///     - Normalizes data and builds an Envelope
-        ///     - Enqueues the Envelope onto the priority queue
-        ///     - Returns immediately (202/200) to the client
-        /// 
-        /// </summary>
-
-        protectedApi.MapPost("/intents", (IntentRequest req, IIntentQueue queue, IHandlerRegistry reg) =>
-        {
-            // 2) Basic validation
-            if (string.IsNullOrWhiteSpace(req.Intent))
-                return Results.BadRequest(new { error = "intent required" });
-
-            // (Optional) As of now, rejecting unknown intents early instead of dropping later
-            if (reg.Resolve(req.Intent.Trim()) is null)
-                return Results.BadRequest(new { error = $"unknown intent '{req.Intent}'" });
-
-            // 3) Build envelope and enqueue
-            var env = new Envelope(
-                Id: Guid.NewGuid().ToString(),
-                Ts: DateTimeOffset.UtcNow,
-                Intent: req.Intent.Trim(),
-                Priority: Math.Clamp(req.Priority ?? 5, 0, 9),
-                CorrelationId: string.IsNullOrWhiteSpace(req.CorrelationId) ? Guid.NewGuid().ToString() : req.CorrelationId!,
-                Payload: req.Payload.ValueKind == JsonValueKind.Undefined ? JsonDocument.Parse("{}").RootElement : req.Payload
-            );
-
-            queue.Enqueue(env);
-            return Results.Json(new { accepted = true, id = env.Id, correlationId = env.CorrelationId });
-        })
-        .RequireRateLimiting("intents");
-
-        app.Run();
     }
 
-    private static async ValueTask<object?> RequireApiKey(
-        EndpointFilterInvocationContext context,
-        EndpointFilterDelegate next)
+    private static async Task<IResult> HandleDebugIntent(
+        IHandlerRegistry registry,
+        JsonElement body,
+        CancellationToken ct)
     {
-        var http = context.HttpContext;
-        var configuredKey = http.RequestServices
-            .GetRequiredService<IConfiguration>()["DANSBY_API_KEY"];
-
-        if (string.IsNullOrEmpty(configuredKey) ||
-            !http.Request.Headers.TryGetValue("X-Api-Key", out var key) ||
-            key != configuredKey)
+        if (!body.TryGetProperty("intent", out var intentElement) ||
+            intentElement.ValueKind != JsonValueKind.String)
         {
-            return Results.Unauthorized();
+            return Results.BadRequest(new { error = "body.intent (string) required" });
         }
 
-        return await next(context);
-    }
-}
-
-// ---- Models & Services ----
-record IntentRequest(string Intent, int? Priority, string? CorrelationId, JsonElement Payload);
-
-sealed class InMemoryPriorityQueue : IIntentQueue
-{
-    private readonly ConcurrentQueue<Envelope>[] _qs =
-        Enumerable.Range(0, 10).Select(_ => new ConcurrentQueue<Envelope>()).ToArray();
-
-    public void Enqueue(Envelope env) => _qs[env.Priority].Enqueue(env);
-
-    public bool TryDequeue(out Envelope? env)
-    {
-        // scan from highest priority (0) to lowest (9)
-        for (int p = 0; p < _qs.Length; p++)
-            if (_qs[p].TryDequeue(out var e)) { env = e; return true; }
-        env = null; return false;
-    }
-
-    public int[] CountByPriority() => _qs.Select(q => q.Count).ToArray();
-    public int TotalCount => _qs.Sum(q => q.Count);
-}
-
-interface IHandlerRegistry
-{
-    void Register(IIntentHandler handler);
-    IIntentHandler? Resolve(string intent);
-}
-
-sealed class HandlerRegistry : IHandlerRegistry
-{
-    private readonly ConcurrentDictionary<string, IIntentHandler> _map = new(StringComparer.OrdinalIgnoreCase);
-    public HandlerRegistry(IEnumerable<IIntentHandler> handlers)
-    {
-        foreach (var h in handlers) Register(h);
-    }
-    public void Register(IIntentHandler handler) => _map[handler.Name] = handler;
-    public IIntentHandler? Resolve(string intent) => _map.TryGetValue(intent, out var h) ? h : null;
-}
-
-/// <summary>
-/// The DispatcherWorker Class:
-/// 
-///     - Loops, pops an Envelope off the queue
-///     - Finds the right handler by the envelope’s Intent via HandlerRegistry
-///     - Calls the handler’s HandleAsync(payload, correlationId, ct)
-///     - Logs success or error
-/// 
-/// </summary>
-sealed class DispatcherWorker : BackgroundService
-{
-    private readonly IIntentQueue _queue;
-    private readonly IHandlerRegistry _registry;
-    private readonly ILogger<DispatcherWorker> _log;
-
-    public DispatcherWorker(IIntentQueue q, IHandlerRegistry reg, ILogger<DispatcherWorker> log)
-    {
-        _queue = q; _registry = reg; _log = log;
-    }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _log.LogInformation("Dispatcher started");
-        while (!stoppingToken.IsCancellationRequested)
+        var intent = intentElement.GetString() ?? "";
+        if (string.IsNullOrWhiteSpace(intent))
         {
-            if (!_queue.TryDequeue(out var env) || env is null)
-            {
-                await Task.Delay(15, stoppingToken);
-                continue;
-            }
+            return Results.BadRequest(new { error = "body.intent cannot be empty" });
+        }
 
-            var handler = _registry.Resolve(env.Intent);
-            if (handler is null)
-            {
-                _log.LogWarning("No handler for intent {Intent} corr={Corr}", env.Intent, env.CorrelationId);
-                continue;
-            }
+        var payload = body.TryGetProperty("payload", out var payloadElement) &&
+                      payloadElement.ValueKind != JsonValueKind.Undefined
+            ? payloadElement
+            : JsonDocument.Parse("{}").RootElement;
 
-            try
+        var handler = registry.Resolve(intent);
+        if (handler is null)
+        {
+            return Results.BadRequest(new { error = $"no handler registered for intent '{intent}'" });
+        }
+
+        var correlationId = Guid.NewGuid().ToString("n");
+        var result = await handler.HandleAsync(payload, correlationId, ct);
+
+        if (!result.Ok)
+        {
+            return Results.BadRequest(new
             {
-                var res = await handler.HandleAsync(env.Payload, env.CorrelationId, stoppingToken);
-                if (res.Ok)
-                    _log.LogInformation("OK intent={Intent} corr={Corr} data={Data}", env.Intent, env.CorrelationId, System.Text.Json.JsonSerializer.Serialize(res.Data));
-                else
-                    _log.LogWarning("ERR intent={Intent} corr={Corr} code={Code} msg={Msg}", env.Intent, env.CorrelationId, res.ErrorCode, res.Message);
-            }
-            catch (Exception ex)
+                error = result.ErrorCode,
+                message = result.Message,
+                intent,
+                corr = correlationId
+            });
+        }
+
+        return Results.Json(new { intent, corr = correlationId, result = result.Data });
+    }
+
+    private static async Task<IResult> HandleDebugRespond(
+        ITextRecognizer recognizer,
+        IHandlerRegistry registry,
+        JsonElement body,
+        CancellationToken ct)
+    {
+        if (!body.TryGetProperty("text", out var textElement) ||
+            textElement.ValueKind != JsonValueKind.String)
+        {
+            return Results.BadRequest(new { error = "body.text (string) required" });
+        }
+
+        var text = textElement.GetString() ?? "";
+        var (intent, _, _, _) = recognizer.Recognize(text);
+
+        var handler = registry.Resolve(intent);
+        if (handler is null)
+        {
+            return Results.BadRequest(new { error = $"no handler for recognized intent '{intent}'" });
+        }
+
+        var payload = string.Equals(intent, "zebra.print.simple", StringComparison.OrdinalIgnoreCase)
+            ? JsonSerializer.SerializeToElement(new { labelText = ExtractLabelText(text) })
+            : JsonSerializer.SerializeToElement(new { text });
+
+        var result = await handler.HandleAsync(payload, Guid.NewGuid().ToString(), ct);
+        if (!result.Ok)
+        {
+            return Results.BadRequest(new
             {
-                _log.LogError(ex, "Unhandled handler error intent={Intent} corr={Corr}", env.Intent, env.CorrelationId);
+                error = result.ErrorCode,
+                message = result.Message,
+                intent
+            });
+        }
+
+        return Results.Json(new { intent, result = result.Data });
+    }
+
+    private static async Task<IResult> ReloadResponses(Pipes.Nlp.Mapping.Responses.IResponseMap map)
+    {
+        await map.ReloadAsync();
+        return Results.Json(new { reloaded = true });
+    }
+
+    private static IResult RecognizeText(ITextRecognizer recognizer, JsonElement body)
+    {
+        if (!body.TryGetProperty("text", out var textElement) ||
+            textElement.ValueKind != JsonValueKind.String)
+        {
+            return Results.BadRequest(new { error = "body.text (string) required" });
+        }
+
+        var (intent, score, slots, domain) = recognizer.Recognize(textElement.GetString() ?? "");
+        return Results.Json(new { intent, score, domain, slots });
+    }
+
+    private static IResult EnqueueIntent(
+        IntentRequest request,
+        IIntentQueue queue,
+        IHandlerRegistry registry)
+    {
+        if (string.IsNullOrWhiteSpace(request.Intent))
+        {
+            return Results.BadRequest(new { error = "intent required" });
+        }
+
+        var intent = request.Intent.Trim();
+        if (registry.Resolve(intent) is null)
+        {
+            return Results.BadRequest(new { error = $"unknown intent '{request.Intent}'" });
+        }
+
+        var env = new Envelope(
+            Id: Guid.NewGuid().ToString(),
+            Ts: DateTimeOffset.UtcNow,
+            Intent: intent,
+            Priority: Math.Clamp(request.Priority ?? 5, 0, 9),
+            CorrelationId: string.IsNullOrWhiteSpace(request.CorrelationId)
+                ? Guid.NewGuid().ToString()
+                : request.CorrelationId!,
+            Payload: request.Payload.ValueKind == JsonValueKind.Undefined
+                ? JsonDocument.Parse("{}").RootElement
+                : request.Payload);
+
+        queue.Enqueue(env);
+        return Results.Json(new
+        {
+            accepted = true,
+            id = env.Id,
+            correlationId = env.CorrelationId
+        });
+    }
+
+    private static string ExtractLabelText(string text)
+    {
+        string[] separators = [":", "-"];
+
+        var position = -1;
+        string? usedSeparator = null;
+
+        foreach (var separator in separators)
+        {
+            var index = text.IndexOf(separator, StringComparison.OrdinalIgnoreCase);
+            if (index >= 0 && (position == -1 || index < position))
+            {
+                position = index;
+                usedSeparator = separator;
             }
         }
-        _log.LogInformation("Dispatcher stopped");
+
+        return position >= 0 && usedSeparator is not null
+            ? text[(position + usedSeparator.Length)..].Trim()
+            : string.Empty;
     }
 }

@@ -57,6 +57,7 @@ public sealed class V1RecognizerEngine
 
         var userTokens = _tokenizer.Tokenize(userInput, filterStopWords: true);
         var userSet = userTokens.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var exactInput = NormalizeForExactMatch(userInput);
 
         string best = "unknown";
         double bestScore = 0.0;
@@ -65,6 +66,11 @@ public sealed class V1RecognizerEngine
         {
             foreach (var ex in intent.Examples)
             {
+                if (NormalizeForExactMatch(ex.Utterance) == exactInput)
+                {
+                    return (intent.Name, 1.0);
+                }
+
                 var exSeq = ex.Tokens ?? Array.Empty<string>();
                 var exSet = exSeq.ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var inter = exSet.Intersect(userSet).Count();
@@ -77,4 +83,7 @@ public sealed class V1RecognizerEngine
         bestScore = Math.Round(bestScore, 3);
         return bestScore >= _threshold ? (best, bestScore) : ("unknown", bestScore);
     }
+
+    private string NormalizeForExactMatch(string text)
+        => string.Join(" ", _tokenizer.Tokenize(text, filterStopWords: false));
 }

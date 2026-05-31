@@ -44,7 +44,7 @@ public sealed class ReplyHandler : IIntentHandler
             reply = Name.ToLowerInvariant() switch
             {
                 "sys.time.now" => $"The time is {DateTime.Now:h:mm tt}.",
-                "sys.date.today" => $"Today is {DateTime.Now:yyyy-MM-dd}.",
+                "sys.time.date" => $"Today is {DateTime.Now:yyyy-MM-dd}.",
                 "sys.time.dayofweek" => $"It's {DateTime.Now:dddd}.",
                 _ => "I'm not sure how to respond to that."
             };
