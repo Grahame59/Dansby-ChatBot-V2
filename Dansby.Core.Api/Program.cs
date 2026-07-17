@@ -4,6 +4,7 @@ using Dansby.Core.Api.Infrastructure;
 using Dansby.Shared;
 using Microsoft.AspNetCore.RateLimiting;
 using Pipes.Nlp.Mapping;
+using Pipes.Nlp.Mapping.Media; 
 
 internal class Program
 {
@@ -59,6 +60,12 @@ internal class Program
             .AllowAnyMethod()));
 
         builder.Services.AddSingleton<IIntentHandler, UiSayLogHandler>();
+
+        // Media library services
+        builder.Services.Configure<MediaLibraryOptions>(builder.Configuration.GetSection("MediaLibrary"));
+        builder.Services.AddSingleton<IMediaIndexService,FileSystemMediaIndexService>();
+
+        // Zebra printer services
         builder.Services.AddSingleton<IIntentHandler, Pipes.Devices.ZebraPrinter.ZebraPrintSimpleHandler>();
         builder.Services.AddSingleton<IIntentHandler, Pipes.Devices.ZebraPrinter.ZebraPrintMailerPreviewHandler>();
         builder.Services.AddSingleton<IIntentHandler, Pipes.Devices.ZebraPrinter.ZebraPrintMailerFromCsvHandler>();

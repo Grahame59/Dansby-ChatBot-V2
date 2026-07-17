@@ -35,6 +35,10 @@ public static class ResponseKeyResolver
         ["sys.time.date"] = Array.Empty<string>(),
         ["sys.time.dayofweek"] = Array.Empty<string>(),
 
+        //Media (Plex) [This is a new intent added just for cohesion, it serves no real function]
+        ["Media.ListMedia"] = new[] { "Media.ListMedia", "Media.ListMovies" },
+        ["Media.SearchMedia"] = new[] { "Media.SearchMedia", "Media.SearchMovies" },
+
         // fun
         ["fun.easteregg.steven"] = new[] { "steveneasteregg" }
 

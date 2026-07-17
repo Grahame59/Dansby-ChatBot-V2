@@ -6,20 +6,20 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-   <!-- So this project can see IIntentHandler, HandlerResult, etc. -->
+  <!-- So this project can see IIntentHandler, HandlerResult, etc. -->
   <ItemGroup>
     <ProjectReference Include="..\Dansby.Shared\Dansby.Shared.csproj" />
   </ItemGroup>
 
-  <!-- Needed for ILogger<T> in a class library -->
+  <!-- Needed for ILogger<T> and IOptions<T> in this class library -->
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
   </ItemGroup>
 
   <!-- Ensure intent_mappings.json is deployed next to the binary -->
   <ItemGroup>
     <None Include="intent_mappings.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
-  
-</Project>
 
+</Project>
