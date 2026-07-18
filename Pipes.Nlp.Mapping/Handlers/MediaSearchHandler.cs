@@ -49,6 +49,7 @@ public sealed class MediaSearchHandler : IIntentHandler
 
         return HandlerResult.Success(new
         {
+            reply,
             query = searchQuery,
             count = matches.Count,
             results = matches

@@ -52,6 +52,7 @@ public sealed class MediaListHandler : IIntentHandler
 
         return HandlerResult.Success(new
         {
+            reply,
             movies,
             shows,
             movieCount = movies.Count,
