@@ -6,6 +6,8 @@ namespace Pipes.Nlp.Mapping;
 public sealed class NlpRecognizeHandler : IIntentHandler
 {
     public string Name => "nlp.recognize";
+    public string Description =>
+    "Recognizes the intent of a user's message using NLP.";
     private readonly ITextRecognizer _rec;
 
     public NlpRecognizeHandler(ITextRecognizer rec) => _rec = rec;

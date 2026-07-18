@@ -10,7 +10,8 @@ namespace Pipes.Nlp.Mapping;
 public sealed class ReplyHandler : IIntentHandler
 {
     public string Name { get; }
-
+    public string Description =>
+    "Provides a reply to the user based on their input.";
     private readonly IResponseMap _responses;
     private readonly IIntentQueue _queue;
     private readonly ILogger<ReplyHandler> _log;

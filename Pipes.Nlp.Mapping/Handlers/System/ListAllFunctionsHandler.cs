@@ -10,6 +10,8 @@ namespace Pipes.Nlp.Mapping.System;
 public sealed class ListAllFunctionsHandler : IIntentHandler
 {
     public string Name => "sys.status.listallfunctions";
+    public string Description =>
+    "Lists every registered intent handler, with optional filtering and paging.";
 
     private readonly IServiceProvider _sp;             // <-- defer resolution
     private readonly IIntentQueue _queue;
@@ -56,17 +58,29 @@ public sealed class ListAllFunctionsHandler : IIntentHandler
 
         // Pretty text
         var sb = new StringBuilder();
-        sb.AppendLine(!string.IsNullOrWhiteSpace(domain)
-            ? $"Functions (domain: {domain}) — {items.Length}/{total}:"
-            : $"Functions — {items.Length}/{total}:");
-        foreach (var name in items) sb.AppendLine($"• {name}");
-        if (skip + items.Length < total)
-            sb.AppendLine($"…and {total - (skip + items.Length)} more (page {page + 1})");
+
+        if (!string.IsNullOrWhiteSpace(domain))
+        {
+            sb.Append(
+                $"I found {total} registered functions in the {domain} domain.");
+        }
+        else
+        {
+            sb.Append(
+                $"I currently have {total} registered functions.");
+        }
+
+        if (items.Length > 0)
+        {
+            sb.Append(" I've listed them in the response panel.");
+        }
 
         // Say
-        var sayPayload = JsonSerializer.Deserialize<JsonElement>(
-            JsonSerializer.Serialize(new { text = sb.ToString().TrimEnd() })
-        );
+        var sayPayload = JsonSerializer.SerializeToElement(new
+        {
+            text = sb.ToString().TrimEnd()
+        });
+
         _queue.Enqueue(new Envelope(
             Id: Guid.NewGuid().ToString(),
             Ts: DateTimeOffset.UtcNow,

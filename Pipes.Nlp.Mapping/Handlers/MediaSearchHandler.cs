@@ -8,7 +8,8 @@ namespace Pipes.Nlp.Mapping.Handlers.Media;
 public sealed class MediaSearchHandler : IIntentHandler
 {
     public string Name => "media.search";
-
+    public string Description =>
+    "Searches for media items in the library, specifically Movies and TV shows on Plex.";
     private readonly IMediaIndexService _mediaIndex;
     private readonly IIntentQueue _queue;
     private readonly ILogger<MediaSearchHandler> _log;

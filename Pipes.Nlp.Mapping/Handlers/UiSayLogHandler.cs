@@ -8,6 +8,8 @@ namespace Pipes.Nlp.Mapping;
 public sealed class UiSayLogHandler : IIntentHandler
 {
     public string Name => "ui.out.say";
+    public string Description =>
+    "Logs UI say events for debugging and monitoring purposes.";
     private readonly ILogger<UiSayLogHandler> _log;
 
     public UiSayLogHandler(ILogger<UiSayLogHandler> log) => _log = log;
