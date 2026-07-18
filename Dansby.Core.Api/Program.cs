@@ -182,45 +182,95 @@ internal class Program
         return Results.Json(new { intent, corr = correlationId, result = result.Data });
     }
 
-    private static async Task<IResult> HandleDebugRespond(
-        ITextRecognizer recognizer,
-        IHandlerRegistry registry,
-        JsonElement body,
-        CancellationToken ct)
+    private static async Task<IResult> HandleDebugRespond(ITextRecognizer recognizer, IHandlerRegistry registry, JsonElement body, CancellationToken ct)
     {
         if (!body.TryGetProperty("text", out var textElement) ||
             textElement.ValueKind != JsonValueKind.String)
         {
-            return Results.BadRequest(new { error = "body.text (string) required" });
+            return Results.BadRequest(new
+            {
+                error = "body.text (string) required"
+            });
         }
 
         var text = textElement.GetString() ?? "";
-        var (intent, _, _, _) = recognizer.Recognize(text);
+
+        // Keep the extracted slots instead of discarding them.
+        var (intent, _, slots, _) = recognizer.Recognize(text);
 
         var handler = registry.Resolve(intent);
+
         if (handler is null)
         {
-            return Results.BadRequest(new { error = $"no handler for recognized intent '{intent}'" });
+            return Results.BadRequest(new
+            {
+                error = $"no handler for recognized intent '{intent}'"
+            });
         }
 
-        var payload = string.Equals(intent, "zebra.print.simple", StringComparison.OrdinalIgnoreCase)
-            ? JsonSerializer.SerializeToElement(new { labelText = ExtractLabelText(text) })
-            : JsonSerializer.SerializeToElement(new { text });
+        JsonElement payload;
 
-        var result = await handler.HandleAsync(payload, Guid.NewGuid().ToString(), ct);
+        if (intent.Equals(
+            "media.search",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            if (!slots.TryGetValue("SearchQuery", out var searchQuery) ||
+                string.IsNullOrWhiteSpace(searchQuery))
+            {
+                return Results.BadRequest(new
+                {
+                    error = "media.search did not extract a SearchQuery slot",
+                    intent
+                });
+            }
+
+            payload = JsonSerializer.SerializeToElement(new
+            {
+                SearchQuery = searchQuery
+            });
+        }
+        else if (intent.Equals(
+            "zebra.print.simple",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            payload = JsonSerializer.SerializeToElement(new
+            {
+                labelText = ExtractLabelText(text)
+            });
+        }
+        else
+        {
+            payload = JsonSerializer.SerializeToElement(new
+            {
+                text
+            });
+        }
+
+        var correlationId = Guid.NewGuid().ToString();
+
+        var result = await handler.HandleAsync(
+            payload,
+            correlationId,
+            ct);
+
         if (!result.Ok)
         {
             return Results.BadRequest(new
             {
                 error = result.ErrorCode,
                 message = result.Message,
-                intent
+                intent,
+                corr = correlationId
             });
         }
 
-        return Results.Json(new { intent, result = result.Data });
+        return Results.Json(new
+        {
+            intent,
+            corr = correlationId,
+            result = result.Data
+        });
     }
-
     private static async Task<IResult> ReloadResponses(Pipes.Nlp.Mapping.Responses.IResponseMap map)
     {
         await map.ReloadAsync();

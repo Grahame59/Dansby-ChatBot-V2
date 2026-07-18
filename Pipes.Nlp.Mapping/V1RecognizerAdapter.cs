@@ -14,43 +14,129 @@ public sealed class V1RecognizerAdapter : ITextRecognizer
         _engine.Load(); // load intents at startup
     }
 
+    // Simple Domain Extraction Logic - Determines the domain of the recognized intent based on the canonical intent name.
+    private static string GetDomain(string intent)
+    {
+        if (string.IsNullOrWhiteSpace(intent) ||
+            intent.Equals(
+                "unknown",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return "other";
+        }
+
+        var separatorIndex = intent.IndexOf('.');
+
+        return separatorIndex > 0
+            ? intent[..separatorIndex]
+            : "other";
+    }
+
     public (string intent, double score, Dictionary<string, string> slots, string domain) Recognize(string text)
     {
         var (intent, score) = _engine.RecognizeBest(text);
-        
-        // normalizing old names → canonical names 
+
+        // Normalize old names into current canonical intent names.
         if (Aliases.TryGetValue(intent, out var canonical))
+        {
             intent = canonical;
+        }
 
-        // then do slots + domain so they use the canonical name
-        // tiny slotting so IoT examples feel real right away
-        var slots = ExtractSlots(text);
+        // Extract only the slots relevant to the recognized intent.
+        var slots = ExtractSlots(intent, text);
 
-        string domain =
-            intent.StartsWith("iot.", StringComparison.OrdinalIgnoreCase) ? "iot" :
-            intent.StartsWith("chat.", StringComparison.OrdinalIgnoreCase) ? "chat" :
-            slots.ContainsKey("action") ? "iot" : "other";
+        // Determine domain from the canonical intent name.
+        var domain = GetDomain(intent);
 
-        _log.LogDebug("Recognized {Intent} score={Score} domain={Domain}", intent, score, domain);
+        _log.LogDebug(
+            "Recognized {Intent} score={Score} domain={Domain}",
+            intent,
+            score,
+            domain);
+
         return (intent, score, slots, domain);
     }
 
-    private static Dictionary<string, string> ExtractSlots(string text)
+    private static Dictionary<string, string> ExtractSlots( string intent, string text)
     {
-        var t = text.ToLowerInvariant();
-        string action =
-            t.Contains("toggle") ? "toggle" :
-            (t.Contains(" on ") || t.StartsWith("on ") || t.EndsWith(" on")) ? "on" :
-            (t.Contains(" off ") || t.StartsWith("off ") || t.EndsWith(" off")) ? "off" : "";
+        if (intent.Equals(
+            "media.search",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return ExtractMediaSearchSlots(text);
+        }
 
-        var locations = new[] { "living room", "livingroom", "kitchen", "office", "bedroom", "desk" };
-        string loc = locations.FirstOrDefault(l => t.Contains(l)) ?? "";
-        string device = t.Contains("lamp") ? "lamp" : (t.Contains("light") ? "light" : "");
+        if (intent.StartsWith(
+            "iot.",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return ExtractIotSlots(text);
+        }
+
+        return new Dictionary<string, string>();
+    }
+
+    //Media Slot Extraction Logic - Used for Searching Media Library (Movies and TV Shows on Plex)
+    private static Dictionary<string, string> ExtractMediaSearchSlots(string text)
+    {
+        var searchQuery = ExtractMediaSearchQuery(text);
 
         var slots = new Dictionary<string, string>();
-        if (!string.IsNullOrEmpty(action)) slots["action"] = action;
-        if (!string.IsNullOrEmpty(loc)) slots["location"] = loc.Replace(" ", "");
-        if (!string.IsNullOrEmpty(device)) slots["device"] = device;
+
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            slots["SearchQuery"] = searchQuery;
+        }
+
+        return slots;
+    }
+
+    //IoT Slot Extraction Logic - Placeholder for future expansion, currently only handles simple action/location/device extraction.
+    private static Dictionary<string, string> ExtractIotSlots(string text)
+    {
+        var t = text.ToLowerInvariant();
+
+        string action =
+            t.Contains("toggle") ? "toggle" :
+            (t.Contains(" on ") ||
+            t.StartsWith("on ") ||
+            t.EndsWith(" on")) ? "on" :
+            (t.Contains(" off ") ||
+            t.StartsWith("off ") ||
+            t.EndsWith(" off")) ? "off" :
+            string.Empty;
+
+        string[] locations =
+        [
+            "living room", "kitchen", "office", "bedroom", "desk"
+        ];
+
+        var location =
+            locations.FirstOrDefault(l => t.Contains(l))
+            ?? string.Empty;
+
+        var device =
+            t.Contains("lamp") ? "lamp" :
+            t.Contains("light") ? "light" :
+            string.Empty;
+
+        var slots = new Dictionary<string, string>();
+
+        if (!string.IsNullOrEmpty(action))
+        {
+            slots["action"] = action;
+        }
+
+        if (!string.IsNullOrEmpty(location))
+        {
+            slots["location"] = location.Replace(" ", "");
+        }
+
+        if (!string.IsNullOrEmpty(device))
+        {
+            slots["device"] = device;
+        }
+
         return slots;
     }
 
@@ -116,5 +202,91 @@ public sealed class V1RecognizerAdapter : ITextRecognizer
         { "handlevolumeintent", "media.volume.set" },    
         { "summonslime", "ui.sprite.summon" }           
     };
+
+    private static string ExtractMediaSearchQuery(string text)
+    {
+        var query = text.Trim();
+
+        // Longer Prefixes should be listed first to avoid premature matches (e.g., "search for the movie titled" before "search for the movie")
+        string[] prefixes = 
+        [
+            "search for the movie titled ",
+            "search for the tv show titled ",
+            "search for the movie ",
+            "search for the film ",
+            "search for the tv show ",
+            "search my movie library for ",
+            "search my tv show library for ",
+            "search my movies for ",
+            "search my shows for ",
+            "search my collection for ",
+            "search plex for ",
+            "search for ",
+            "find the movie titled ",
+            "find the tv show titled ",
+            "find the movie ",
+            "find the film ",
+            "find the tv show ",
+            "find ",
+            "look up the movie titled ",
+            "look up the tv show titled ",
+            "look up the movie ",
+            "look up the film ",
+            "look up the tv show ",
+            "look up ",
+            "do i have the movie ",
+            "do i have the film ",
+            "do i have the tv show ",
+            "do i have ",
+            "is ",
+            "do I own the movie ",
+            "do I own the film ",
+            "do I own the tv show ",
+            "do I own "
+
+        ];
+
+        foreach (var prefix in prefixes)
+        {
+            if (!query.StartsWith(
+                prefix,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            query = query[prefix.Length..];
+            break;
+        }
+
+        string[] suffixes =
+        [
+            " on plex",
+            " in my movie collection",
+            " in my tv collection",
+            " in my collection",
+            " on my server",
+            " in my library",
+            " in my movie library",
+            " in my tv library"
+        ];
+
+        foreach (var suffix in suffixes)
+        {
+            if (!query.EndsWith(
+                suffix,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            query = query[..^suffix.Length];
+            break;
+        }
+
+        return query
+            .Trim()
+            .TrimEnd('?', '!', '.');
+    }
 
 }
