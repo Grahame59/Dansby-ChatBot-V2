@@ -1396,232 +1396,231 @@
       {
         "Utterance": "print this on a label",
         "Tokens": ["print", "this", "on", "a", "label"]
-      },
-      {
-        "Name": "media.list",
-        "Tags": [
-            "media",
-            "movies",
-            "tv shows",
-            "plex"
-        ],
-        "Aliases": [
-            "movie list",
-            "movies",
-            "tv show list",
-            "tv shows",
-            "film library"
-        ],
-        "Deprecated": false,
-        "Examples": [
-            {
-                "Utterance": "list my movies",
-                "Tokens": ["list","my","movies"]
-            },
-            {
-                "Utterance": "show my movie collection",
-                "Tokens": ["show","my","movie","collection"]
-            },
-            {
-                "Utterance": "what movies do I have",
-                "Tokens": ["what","movies","do","i","have"]
-            },
-            {
-                "Utterance": "display all movies",
-                "Tokens": ["display","all","movies"]
-            },
-            {
-                "Utterance": "show every movie",
-                "Tokens": ["show","every","movie"]
-            },
-            {
-                "Utterance": "list my tv shows",
-                "Tokens": ["list","my","tv","shows"]
-            },
-            {
-                "Utterance": "show my television collection",
-                "Tokens": ["show","my","television","collection"]
-            },
-            {
-                "Utterance": "what tv shows do I have",
-                "Tokens": ["what","tv","shows","do","i","have"]
-            },
-            {
-                "Utterance": "display all tv shows",
-                "Tokens": ["display","all","tv","shows"]
-            },
-            {
-                "Utterance": "show every tv show",
-                "Tokens": ["show","every","tv","show"]
-            }
-        ]
-      },
-      {
-        "Name": "media.search",
-        "Tags": [
+      }
+    ]
+  },
+    {
+      "Name": "media.list",
+      "Tags": [
           "media",
           "movies",
           "tv shows",
-          "plex"    
-        ],
-        "Aliases": [
-            "search movies",
-            "find movie",
-            "search tv shows",
-            "find tv show",
-            "movie search",
-            "tv show search"
-        ],
-        "Deprecated": false,
-        "Examples": [ 
-        {
-          "Utterance": "search for the movie <SearchQuery>",
-          "Tokens": ["search","for","the","movie","<SearchQuery>"]
-        },
-        {
-          "Utterance": "find the movie <SearchQuery>",
-          "Tokens": ["find","the","movie","<SearchQuery>"]
-        },
-        {
-          "Utterance": "look up the movie <SearchQuery>",
-          "Tokens": ["look","up","the","movie","<SearchQuery>"]
-        },
-        {
-          "Utterance": "search for <SearchQuery>",
-          "Tokens": ["search","for","<SearchQuery>"]
-        },
-        {
-          "Utterance": "find <SearchQuery>",
-          "Tokens": ["find","<SearchQuery>"]
-        },
-        {
-          "Utterance": "look up <SearchQuery>",
-          "Tokens": ["look","up","<SearchQuery>"]
-        },
-        {
-          "Utterance": "search for the movie titled <SearchQuery>",
-          "Tokens": ["search","for","the","movie","titled","<SearchQuery>"]
-        },
-        {
-          "Utterance": "find the movie titled <SearchQuery>",
-          "Tokens": ["find","the","movie","titled","<SearchQuery>"]
-        },
-        {
-          "Utterance": "look up the movie titled <SearchQuery>",
-          "Tokens": ["look","up","the","movie","titled","<SearchQuery>"]
-        },
-        {
-          "Utterance": "search for the film <SearchQuery>",
-          "Tokens": ["search","for","the","film","<SearchQuery>"]
-        },
-        {
-          "Utterance": "find the film <SearchQuery>",
-          "Tokens": ["find","the","film","<SearchQuery>"]
-        },
-        {
-          "Utterance": "look up the film <SearchQuery>",
-          "Tokens": ["look","up","the","film","<SearchQuery>"]
-        },
-        {
-          "Utterance": "Do I have the movie <SearchQuery>?",
-          "Tokens": ["do","i","have","the","movie","<SearchQuery>"]
-        },
-        {
-          "Utterance": "Do I have the film <SearchQuery>?",
-          "Tokens": ["do","i","have","the","film","<SearchQuery>"]
-        },
-        {
-          "Utterance": "Is <SearchQuery> in my collection?",
-          "Tokens": ["is","<SearchQuery>","in","my","collection"]
-        },
-        {
-          "Utterance": "Do I have <SearchQuery> on plex?",
-          "Tokens": ["do","i","have","<SearchQuery>","on","plex"]
-        },
-        {
-          "Utterance": "search my movies for <SearchQuery>",
-          "Tokens": ["search","my","movies","for","<SearchQuery>"]
-        },
-        {
-          "Utterance": "search my movie library for <SearchQuery>",
-          "Tokens": ["search","my","movie","library","for","<SearchQuery>"]
-        },
-        {
-          "Utterance": "search my collection for <SearchQuery>",
-          "Tokens": ["search","my","collection","for","<SearchQuery>"]
-        },
-        {
-          "Utterance": "search plex for <SearchQuery>",
-          "Tokens": ["search","plex","for","<SearchQuery>"]
-        },
-        {
-          "Utterance": "search for the tv show <SearchQuery>",
-          "Tokens": ["search","for","the","tv","show","<SearchQuery>"]
-        },
-        {
-          "Utterance": "find the tv show <SearchQuery>",
-          "Tokens": ["find","the","tv","show","<SearchQuery>"]
-        },
-        {
-          "Utterance": "look up the tv show <SearchQuery>",
-          "Tokens": ["look","up","the","tv","show","<SearchQuery>"]
-        },
-        {
-          "Utterance": "search for <SearchQuery>",
-          "Tokens": ["search","for","<SearchQuery>"]
-        },
-        {
-          "Utterance": "find <SearchQuery>",
-          "Tokens": ["find","<SearchQuery>"]
-        },
-        {
-          "Utterance": "look up <SearchQuery>",
-          "Tokens": ["look","up","<SearchQuery>"]
-        },
-        {
-          "Utterance": "search for the tv show titled <SearchQuery>",
-          "Tokens": ["search","for","the","tv","show","titled","<SearchQuery>"]
-        },
-        {
-          "Utterance": "find the tv show titled <SearchQuery>",
-          "Tokens": ["find","the","tv","show","titled","<SearchQuery>"]
-        },
-        {
-          "Utterance": "look up the tv show titled <SearchQuery>",
-          "Tokens": ["look","up","the","tv","show","titled","<SearchQuery>"]
-        },
-        {
-          "Utterance": "Do I have the tv show <SearchQuery>?",
-          "Tokens": ["do","i","have","the","tv","show","<SearchQuery>"]
-        },
-        {
-          "Utterance": "Is <SearchQuery> in my collection?",
-          "Tokens": ["is","<SearchQuery>","in","my","collection"]
-        },
-        {
-          "Utterance": "Do I have <SearchQuery> on plex?",
-          "Tokens": ["do","i","have","<SearchQuery>","on","plex"]
-        },
-        {
-          "Utterance": "search my shows for <SearchQuery>",
-          "Tokens": ["search","my","shows","for","<SearchQuery>"]
-        },
-        {
-          "Utterance": "search my tv showlibrary for <SearchQuery>",
-          "Tokens": ["search","my","tv", "show","library","for","<SearchQuery>"]
-        },
-        {
-          "Utterance": "search my collection for <SearchQuery>",
-          "Tokens": ["search","my","collection","for","<SearchQuery>"]
-        },
-        {
-          "Utterance": "search plex for <SearchQuery>",
-          "Tokens": ["search","plex","for","<SearchQuery>"]
-        }
+          "plex"
+      ],
+      "Aliases": [
+          "movie list",
+          "movies",
+          "tv show list",
+          "tv shows",
+          "film library"
+      ],
+      "Deprecated": false,
+      "Examples": [
+          {
+              "Utterance": "list my movies",
+              "Tokens": ["list","my","movies"]
+          },
+          {
+              "Utterance": "show my movie collection",
+              "Tokens": ["show","my","movie","collection"]
+          },
+          {
+              "Utterance": "what movies do I have",
+              "Tokens": ["what","movies","do","i","have"]
+          },
+          {
+              "Utterance": "display all movies",
+              "Tokens": ["display","all","movies"]
+          },
+          {
+              "Utterance": "show every movie",
+              "Tokens": ["show","every","movie"]
+          },
+          {
+              "Utterance": "list my tv shows",
+              "Tokens": ["list","my","tv","shows"]
+          },
+          {
+              "Utterance": "show my television collection",
+              "Tokens": ["show","my","television","collection"]
+          },
+          {
+              "Utterance": "what tv shows do I have",
+              "Tokens": ["what","tv","shows","do","i","have"]
+          },
+          {
+              "Utterance": "display all tv shows",
+              "Tokens": ["display","all","tv","shows"]
+          },
+          {
+              "Utterance": "show every tv show",
+              "Tokens": ["show","every","tv","show"]
+          }
       ]
+    },
+    {
+      "Name": "media.search",
+      "Tags": [
+        "media",
+        "movies",
+        "tv shows",
+        "plex"    
+      ],
+      "Aliases": [
+          "search movies",
+          "find movie",
+          "search tv shows",
+          "find tv show",
+          "movie search",
+          "tv show search"
+      ],
+      "Deprecated": false,
+      "Examples": [ 
+      {
+        "Utterance": "search for the movie <SearchQuery>",
+        "Tokens": ["search","for","the","movie","<SearchQuery>"]
+      },
+      {
+        "Utterance": "find the movie <SearchQuery>",
+        "Tokens": ["find","the","movie","<SearchQuery>"]
+      },
+      {
+        "Utterance": "look up the movie <SearchQuery>",
+        "Tokens": ["look","up","the","movie","<SearchQuery>"]
+      },
+      {
+        "Utterance": "search for <SearchQuery>",
+        "Tokens": ["search","for","<SearchQuery>"]
+      },
+      {
+        "Utterance": "find <SearchQuery>",
+        "Tokens": ["find","<SearchQuery>"]
+      },
+      {
+        "Utterance": "look up <SearchQuery>",
+        "Tokens": ["look","up","<SearchQuery>"]
+      },
+      {
+        "Utterance": "search for the movie titled <SearchQuery>",
+        "Tokens": ["search","for","the","movie","titled","<SearchQuery>"]
+      },
+      {
+        "Utterance": "find the movie titled <SearchQuery>",
+        "Tokens": ["find","the","movie","titled","<SearchQuery>"]
+      },
+      {
+        "Utterance": "look up the movie titled <SearchQuery>",
+        "Tokens": ["look","up","the","movie","titled","<SearchQuery>"]
+      },
+      {
+        "Utterance": "search for the film <SearchQuery>",
+        "Tokens": ["search","for","the","film","<SearchQuery>"]
+      },
+      {
+        "Utterance": "find the film <SearchQuery>",
+        "Tokens": ["find","the","film","<SearchQuery>"]
+      },
+      {
+        "Utterance": "look up the film <SearchQuery>",
+        "Tokens": ["look","up","the","film","<SearchQuery>"]
+      },
+      {
+        "Utterance": "Do I have the movie <SearchQuery>?",
+        "Tokens": ["do","i","have","the","movie","<SearchQuery>"]
+      },
+      {
+        "Utterance": "Do I have the film <SearchQuery>?",
+        "Tokens": ["do","i","have","the","film","<SearchQuery>"]
+      },
+      {
+        "Utterance": "Is <SearchQuery> in my collection?",
+        "Tokens": ["is","<SearchQuery>","in","my","collection"]
+      },
+      {
+        "Utterance": "Do I have <SearchQuery> on plex?",
+        "Tokens": ["do","i","have","<SearchQuery>","on","plex"]
+      },
+      {
+        "Utterance": "search my movies for <SearchQuery>",
+        "Tokens": ["search","my","movies","for","<SearchQuery>"]
+      },
+      {
+        "Utterance": "search my movie library for <SearchQuery>",
+        "Tokens": ["search","my","movie","library","for","<SearchQuery>"]
+      },
+      {
+        "Utterance": "search my collection for <SearchQuery>",
+        "Tokens": ["search","my","collection","for","<SearchQuery>"]
+      },
+      {
+        "Utterance": "search plex for <SearchQuery>",
+        "Tokens": ["search","plex","for","<SearchQuery>"]
+      },
+      {
+        "Utterance": "search for the tv show <SearchQuery>",
+        "Tokens": ["search","for","the","tv","show","<SearchQuery>"]
+      },
+      {
+        "Utterance": "find the tv show <SearchQuery>",
+        "Tokens": ["find","the","tv","show","<SearchQuery>"]
+      },
+      {
+        "Utterance": "look up the tv show <SearchQuery>",
+        "Tokens": ["look","up","the","tv","show","<SearchQuery>"]
+      },
+      {
+        "Utterance": "search for <SearchQuery>",
+        "Tokens": ["search","for","<SearchQuery>"]
+      },
+      {
+        "Utterance": "find <SearchQuery>",
+        "Tokens": ["find","<SearchQuery>"]
+      },
+      {
+        "Utterance": "look up <SearchQuery>",
+        "Tokens": ["look","up","<SearchQuery>"]
+      },
+      {
+        "Utterance": "search for the tv show titled <SearchQuery>",
+        "Tokens": ["search","for","the","tv","show","titled","<SearchQuery>"]
+      },
+      {
+        "Utterance": "find the tv show titled <SearchQuery>",
+        "Tokens": ["find","the","tv","show","titled","<SearchQuery>"]
+      },
+      {
+        "Utterance": "look up the tv show titled <SearchQuery>",
+        "Tokens": ["look","up","the","tv","show","titled","<SearchQuery>"]
+      },
+      {
+        "Utterance": "Do I have the tv show <SearchQuery>?",
+        "Tokens": ["do","i","have","the","tv","show","<SearchQuery>"]
+      },
+      {
+        "Utterance": "Is <SearchQuery> in my collection?",
+        "Tokens": ["is","<SearchQuery>","in","my","collection"]
+      },
+      {
+        "Utterance": "Do I have <SearchQuery> on plex?",
+        "Tokens": ["do","i","have","<SearchQuery>","on","plex"]
+      },
+      {
+        "Utterance": "search my shows for <SearchQuery>",
+        "Tokens": ["search","my","shows","for","<SearchQuery>"]
+      },
+      {
+        "Utterance": "search my tv showlibrary for <SearchQuery>",
+        "Tokens": ["search","my","tv", "show","library","for","<SearchQuery>"]
+      },
+      {
+        "Utterance": "search my collection for <SearchQuery>",
+        "Tokens": ["search","my","collection","for","<SearchQuery>"]
+      },
+      {
+        "Utterance": "search plex for <SearchQuery>",
+        "Tokens": ["search","plex","for","<SearchQuery>"]
       }
+      ]
+    }
       
-
-    ]
-  }
 ]
