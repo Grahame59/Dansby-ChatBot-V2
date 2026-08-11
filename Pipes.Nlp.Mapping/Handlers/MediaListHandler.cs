@@ -7,9 +7,9 @@ namespace Pipes.Nlp.Mapping.Handlers.Media;
 
 public sealed class MediaListHandler : IIntentHandler
 {
-    public string Name => "media.list";
-    public string Description =>
-    "Lists every media item in the library, specifically all Movies and TV shows on Plex.";
+    public IntentMetadata Metadata {get;} = new(
+        Name: "media.list",
+        Summary: "Lists every media item in the library, specifically all Movies and TV shows on Plex.");
 
     private readonly IMediaIndexService _mediaIndex;
     private readonly IIntentQueue _queue;

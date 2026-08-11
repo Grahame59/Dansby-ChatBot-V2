@@ -2,18 +2,18 @@
 using System.Text;
 using System.Text.Json;
 using Dansby.Shared;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection; // GetServices<T>()
 
 namespace Pipes.Nlp.Mapping.System;
 
 public sealed class ListAllFunctionsHandler : IIntentHandler
 {
-    public string Name => "sys.status.listallfunctions";
-    public string Description =>
-    "Lists every registered intent handler, with optional filtering and paging.";
+    public IntentMetadata Metadata { get; } = new(
+        Name: "sys.status.listallfunctions",
+        Summary: "Lists every registered intent handler, with optional filtering and paging.");
 
-    private readonly IServiceProvider _sp;             // <-- defer resolution
+    private readonly IServiceProvider _sp;
     private readonly IIntentQueue _queue;
     private readonly ILogger<ListAllFunctionsHandler> _log;
 
@@ -27,36 +27,74 @@ public sealed class ListAllFunctionsHandler : IIntentHandler
         _log = log;
     }
 
-    public Task<HandlerResult> HandleAsync(JsonElement payload, string corr, CancellationToken ct)
+    public Task<HandlerResult> HandleAsync(
+        JsonElement payload,
+        string corr,
+        CancellationToken ct)
     {
-        // Resolving the handler list **at call time**, not constructor time
+        // Resolve handlers at call time to avoid a circular DI dependency.
         var handlers = _sp.GetServices<IIntentHandler>();
 
-        // Collect names, excluding self
-        var allNames = handlers
-            .Where(h => !string.IsNullOrWhiteSpace(h.Name) && !string.Equals(h.Name, Name, StringComparison.OrdinalIgnoreCase))
-            .Select(h => h.Name)
-            .Distinct(StringComparer.OrdinalIgnoreCase);
+        // Collect handler metadata, excluding this handler.
+        var allFunctions = handlers
+            .Select(handler => handler.Metadata)
+            .Where(metadata =>
+                !string.IsNullOrWhiteSpace(metadata.Name) &&
+                !string.Equals(
+                    metadata.Name,
+                    Metadata.Name,
+                    StringComparison.OrdinalIgnoreCase))
+            .GroupBy(
+                metadata => metadata.Name,
+                StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First());
 
-        // Filters + pagination
+        // Filters and pagination.
         string? domain = TryGetString(payload, "domain");
         string? starts = TryGetString(payload, "startsWith");
         int page = Math.Max(1, TryGetInt(payload, "page") ?? 1);
-        int pageSize = Math.Clamp(TryGetInt(payload, "pageSize") ?? 100, 1, 500);
+        int pageSize = Math.Clamp(
+            TryGetInt(payload, "pageSize") ?? 100,
+            1,
+            500);
 
-        IEnumerable<string> q = allNames;
+        IEnumerable<IntentMetadata> query = allFunctions;
+
         if (!string.IsNullOrWhiteSpace(domain))
-            q = q.Where(n => n.StartsWith(domain + ".", StringComparison.OrdinalIgnoreCase));
-        if (!string.IsNullOrWhiteSpace(starts))
-            q = q.Where(n => n.StartsWith(starts, StringComparison.OrdinalIgnoreCase));
+        {
+            query = query.Where(metadata =>
+                metadata.Name.StartsWith(
+                    domain + ".",
+                    StringComparison.OrdinalIgnoreCase));
+        }
 
-        var filtered = q.OrderBy(n => n, StringComparer.OrdinalIgnoreCase).ToList();
+        if (!string.IsNullOrWhiteSpace(starts))
+        {
+            query = query.Where(metadata =>
+                metadata.Name.StartsWith(
+                    starts,
+                    StringComparison.OrdinalIgnoreCase));
+        }
+
+        var filtered = query
+            .OrderBy(
+                metadata => metadata.Name,
+                StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
         int total = filtered.Count;
         int skip = (page - 1) * pageSize;
-        var items = filtered.Skip(skip).Take(pageSize).ToArray();
 
-        // Pretty text
+        var items = filtered
+            .Skip(skip)
+            .Take(pageSize)
+            .Select(metadata => new
+            {
+                name = metadata.Name,
+                summary = metadata.Summary
+            })
+            .ToArray();
+
         var sb = new StringBuilder();
 
         if (!string.IsNullOrWhiteSpace(domain))
@@ -75,7 +113,6 @@ public sealed class ListAllFunctionsHandler : IIntentHandler
             sb.Append(" I've listed them in the response panel.");
         }
 
-        // Say
         var sayPayload = JsonSerializer.SerializeToElement(new
         {
             text = sb.ToString().TrimEnd()
@@ -87,24 +124,41 @@ public sealed class ListAllFunctionsHandler : IIntentHandler
             Intent: "ui.out.say",
             Priority: 5,
             CorrelationId: corr,
-            Payload: sayPayload
-        ));
+            Payload: sayPayload));
 
         var result = new
         {
-            total, page, pageSize,
+            total,
+            page,
+            pageSize,
             returned = items.Length,
-            filters = new { domain, startsWith = starts },
+            filters = new
+            {
+                domain,
+                startsWith = starts
+            },
             items
         };
 
-        _log.LogInformation("listallfunctions returned {Returned}/{Total} (page {Page})", items.Length, total, page);
+        _log.LogInformation(
+            "listallfunctions returned {Returned}/{Total} (page {Page})",
+            items.Length,
+            total,
+            page);
+
         return Task.FromResult(HandlerResult.Success(result));
     }
 
-    private static string? TryGetString(JsonElement el, string name)
-        => el.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+    private static string? TryGetString(JsonElement el, string name) =>
+        el.TryGetProperty(name, out var value) &&
+        value.ValueKind == JsonValueKind.String
+            ? value.GetString()
+            : null;
 
-    private static int? TryGetInt(JsonElement el, string name)
-        => el.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number && v.TryGetInt32(out var i) ? i : null;
+    private static int? TryGetInt(JsonElement el, string name) =>
+        el.TryGetProperty(name, out var value) &&
+        value.ValueKind == JsonValueKind.Number &&
+        value.TryGetInt32(out var result)
+            ? result
+            : null;
 }

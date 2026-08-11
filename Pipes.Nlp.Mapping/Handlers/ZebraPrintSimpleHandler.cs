@@ -28,10 +28,11 @@ namespace Pipes.Devices.ZebraPrinter;
 /// </summary>
 public sealed class ZebraPrintSimpleHandler : IIntentHandler
 {
-    public string Name => "zebra.print.simple";
-    public string Description =>
-    "Prints simple labels using a Zebra printer.";
-    
+    public IntentMetadata Metadata { get; } = new(
+        Name: "zebra.print.simple",
+        Summary: "Prints simple labels using a Zebra printer."
+    );
+
     // Dependency Injection
     private readonly ILogger<ZebraPrintSimpleHandler> _log;
     private readonly IIntentQueue _queue;

@@ -8,9 +8,10 @@ namespace Pipes.Devices.ZebraPrinter;
 
 public sealed class ZebraPrintMailerPreviewHandler : IIntentHandler
 {
-    public string Name => "zebra.print.mailer.preview";
-    public string Description =>
-    "Previews mailing labels from CSV data using a Zebra printer.";   
+    public IntentMetadata Metadata { get; } = new(
+        Name: "zebra.print.mailer.preview",
+        Summary: "Previews mailing labels from CSV data using a Zebra printer."
+    );
     private readonly ILogger<ZebraPrintMailerPreviewHandler> _log;
 
     public ZebraPrintMailerPreviewHandler(ILogger<ZebraPrintMailerPreviewHandler> log)

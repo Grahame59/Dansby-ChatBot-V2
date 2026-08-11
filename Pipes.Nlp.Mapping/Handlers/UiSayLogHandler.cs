@@ -7,9 +7,10 @@ namespace Pipes.Nlp.Mapping;
 [ManualRegistration]
 public sealed class UiSayLogHandler : IIntentHandler
 {
-    public string Name => "ui.out.say";
-    public string Description =>
-    "Logs UI say events for debugging and monitoring purposes.";
+    public IntentMetadata Metadata { get; } = new(
+        Name: "ui.out.say",
+        Summary: "Logs UI say events for debugging and monitoring purposes."
+    );
     private readonly ILogger<UiSayLogHandler> _log;
 
     public UiSayLogHandler(ILogger<UiSayLogHandler> log) => _log = log;

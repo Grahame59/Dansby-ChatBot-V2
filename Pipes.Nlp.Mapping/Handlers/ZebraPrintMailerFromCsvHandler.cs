@@ -33,9 +33,10 @@ namespace Pipes.Devices.ZebraPrinter;
 /// </summary>
 public sealed class ZebraPrintMailerFromCsvHandler : IIntentHandler
 {
-    public string Name => "zebra.print.mailer.from_csv";
-    public string Description =>
-    "Prints mailing labels from CSV data using a Zebra printer.";
+    public IntentMetadata Metadata { get; } = new(
+        Name: "zebra.print.mailer.from_csv",
+        Summary: "Prints mailing labels from CSV data using a Zebra printer."
+    );
     private readonly ILogger<ZebraPrintMailerFromCsvHandler> _log;
     private readonly IIntentQueue _queue;
 

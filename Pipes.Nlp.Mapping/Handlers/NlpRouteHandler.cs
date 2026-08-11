@@ -11,9 +11,9 @@ namespace Pipes.Nlp.Mapping;
 public sealed class NlpRouteHandler : IIntentHandler
 {
     // The Intent name, ("nlp.route"), this handler consumes
-    public string Name => "nlp.route";
-    public string Description =>
-    "Routes user messages to the appropriate intent handler based on NLP recognition.";
+    public IntentMetadata Metadata {get;} = new(
+        Name: "nlp.route",
+        Summary: "Routes user messages to the appropriate intent handler based on NLP recognition.");
     private readonly ITextRecognizer _recognizer; // This is the NLP 'Brain' (The Old Jaccard Recognizer)
     private readonly IIntentQueue _queue; // Shared queue to push follow-up work
 

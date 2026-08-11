@@ -16,8 +16,11 @@ internal sealed class HandlerRegistry : IHandlerRegistry
         }
     }
 
-    public void Register(IIntentHandler handler) => _handlers[handler.Name] = handler;
+    public void Register(IIntentHandler handler) => 
+    _handlers[handler.Metadata.Name] = handler;
 
     public IIntentHandler? Resolve(string intent) =>
-        _handlers.TryGetValue(intent, out var handler) ? handler : null;
+        _handlers.TryGetValue(intent, out var handler) 
+        ? handler 
+        : null;
 }

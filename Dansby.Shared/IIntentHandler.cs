@@ -4,9 +4,11 @@ namespace Dansby.Shared
 {
     public interface IIntentHandler
     {
-        string Name { get; }
+        IntentMetadata Metadata { get; }
 
-        string Description { get; }
-        Task<HandlerResult> HandleAsync(JsonElement payload, string correlationId, CancellationToken ct);
+    Task<HandlerResult> HandleAsync(
+        JsonElement payload,
+        string correlationId,
+        CancellationToken ct);
     }
 }
