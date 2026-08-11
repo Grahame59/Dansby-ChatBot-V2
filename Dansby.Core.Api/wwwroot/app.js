@@ -1,7 +1,11 @@
 const state = {
   mode: 'respond',
   printMode: false,
-  lastRaw: '{}'
+  lastRaw: '{}',
+  mediaSettings: {
+    moviePaths: [],
+    tvShowPaths: []
+  }
 };
 
 const modes = {
@@ -55,6 +59,25 @@ function bindEvents() {
   el('debugTemplate').addEventListener('click', loadDebugTemplate);
   el('setPreview').addEventListener('click', () => setPrintMode(false));
   el('setPrint').addEventListener('click', () => setPrintMode(true));
+  el('openSettings').addEventListener('click', openSettings);
+  el('closeSettings').addEventListener('click', closeSettings);
+  el('cancelSettings').addEventListener('click', closeSettings);
+  el('reloadMediaSettings').addEventListener('click', loadMediaSettings);
+  el('saveMediaSettings').addEventListener('click', saveMediaSettings);
+
+  el('addMoviePath').addEventListener('click', () => {
+    addPathRow('moviePathList', '');
+  });
+
+  el('addTvShowPath').addEventListener('click', () => {
+    addPathRow('tvShowPathList', '');
+  });
+
+  el('settingsDialog').addEventListener('click', event => {
+    if (event.target === el('settingsDialog')) {
+      closeSettings();
+    }
+  });
 }
 
 function setMode(mode) {
@@ -320,5 +343,247 @@ function setPrintMode(enabled) {
     }
   } catch {
     // Text area is not JSON; nothing to update.
+  }
+
+  async function openSettings() {
+    const dialog = el('settingsDialog');
+
+    if (!dialog.open) {
+      dialog.showModal();
+    }
+
+    await loadMediaSettings();
+  }
+
+  function closeSettings() {
+    const dialog = el('settingsDialog');
+
+    if (dialog.open) {
+      dialog.close();
+    }
+
+    setMediaSettingsStatus('');
+  }
+
+  async function loadMediaSettings() {
+    setMediaSettingsBusy(true);
+    setMediaSettingsStatus('Loading settings...');
+
+    try {
+      const response = await fetch('/api/settings/media', {
+        method: 'GET',
+        headers: buildApiHeaders()
+      });
+
+      const body = await readResponseBody(response);
+
+      if (!response.ok) {
+        throw new Error(getErrorMessage(body, `Unable to load settings (${response.status}).`));
+      }
+
+      const settings = normalizeMediaSettings(body);
+
+      state.mediaSettings = {
+        moviePaths: [...settings.moviePaths],
+        tvShowPaths: [...settings.tvShowPaths]
+      };
+
+      renderPathList('moviePathList', settings.moviePaths);
+      renderPathList('tvShowPathList', settings.tvShowPaths);
+      setMediaSettingsStatus('Settings loaded.', 'ok');
+    } catch (error) {
+      setMediaSettingsStatus(
+        String(error?.message || 'Unable to load media settings.'),
+        'bad'
+      );
+    } finally {
+      setMediaSettingsBusy(false);
+    }
+  }
+
+  async function saveMediaSettings() {
+    const settings = {
+      moviePaths: collectPaths('moviePathList'),
+      tvShowPaths: collectPaths('tvShowPathList')
+    };
+
+    setMediaSettingsBusy(true);
+    setMediaSettingsStatus('Saving settings...');
+
+    try {
+      const response = await fetch('/api/settings/media', {
+        method: 'PUT',
+        headers: buildApiHeaders(true),
+        body: JSON.stringify(settings)
+      });
+
+      const body = await readResponseBody(response);
+
+      if (!response.ok) {
+        throw new Error(getErrorMessage(body, `Unable to save settings (${response.status}).`));
+      }
+
+      const savedSettings = normalizeMediaSettings(body, settings);
+
+      state.mediaSettings = {
+        moviePaths: [...savedSettings.moviePaths],
+        tvShowPaths: [...savedSettings.tvShowPaths]
+      };
+
+      renderPathList('moviePathList', savedSettings.moviePaths);
+      renderPathList('tvShowPathList', savedSettings.tvShowPaths);
+      setMediaSettingsStatus('Media settings saved.', 'ok');
+    } catch (error) {
+      setMediaSettingsStatus(
+        String(error?.message || 'Unable to save media settings.'),
+        'bad'
+      );
+    } finally {
+      setMediaSettingsBusy(false);
+    }
+  }
+
+  function buildApiHeaders(includeJson = false) {
+    const headers = {};
+    const apiKey = val('apiKey');
+
+    if (includeJson) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    if (apiKey) {
+      headers['X-Api-Key'] = apiKey;
+    }
+
+    return headers;
+  }
+
+  async function readResponseBody(response) {
+    const text = await response.text();
+
+    if (!text) {
+      return {};
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { message: text };
+    }
+  }
+
+  function normalizeMediaSettings(body, fallback = {}) {
+    const source =
+      body?.settings?.media ??
+      body?.media ??
+      body?.settings ??
+      body ??
+      {};
+
+    return {
+      moviePaths: normalizePathArray(
+        source.moviePaths ??
+        source.movie_paths ??
+        fallback.moviePaths
+      ),
+      tvShowPaths: normalizePathArray(
+        source.tvShowPaths ??
+        source.tv_show_paths ??
+        source.tvPaths ??
+        fallback.tvShowPaths
+      )
+    };
+  }
+
+  function normalizePathArray(paths) {
+    if (!Array.isArray(paths)) {
+      return [];
+    }
+
+    return paths
+      .filter(path => typeof path === 'string')
+      .map(path => path.trim())
+      .filter(Boolean);
+  }
+
+  function renderPathList(listId, paths) {
+    const list = el(listId);
+    list.replaceChildren();
+
+    if (!paths.length) {
+      addPathRow(listId, '');
+      return;
+    }
+
+    paths.forEach(path => addPathRow(listId, path));
+  }
+
+  function addPathRow(listId, path) {
+    const list = el(listId);
+    const row = document.createElement('div');
+    const input = document.createElement('input');
+    const removeButton = document.createElement('button');
+
+    row.className = 'path-row';
+
+    input.className = 'path-input';
+    input.type = 'text';
+    input.value = path;
+    input.placeholder = getPathPlaceholder(listId);
+    input.autocomplete = 'off';
+    input.setAttribute('aria-label', getPathLabel(listId));
+
+    removeButton.className = 'remove-path';
+    removeButton.type = 'button';
+    removeButton.textContent = 'Remove';
+    removeButton.setAttribute('aria-label', `Remove ${getPathLabel(listId).toLowerCase()}`);
+
+    removeButton.addEventListener('click', () => {
+      row.remove();
+
+      if (!list.children.length) {
+        addPathRow(listId, '');
+      }
+    });
+
+    row.append(input, removeButton);
+    list.append(row);
+  }
+
+  function collectPaths(listId) {
+    return [...el(listId).querySelectorAll('.path-input')]
+      .map(input => input.value.trim())
+      .filter(Boolean);
+  }
+
+  function getPathLabel(listId) {
+    return listId === 'moviePathList' ? 'Movie path' : 'TV-show path';
+  }
+
+  function getPathPlaceholder(listId) {
+    return listId === 'moviePathList'
+      ? '/media/movies'
+      : '/media/tv';
+  }
+
+  function setMediaSettingsStatus(message, statusClass = '') {
+    const status = el('mediaSettingsStatus');
+    status.textContent = message;
+    status.className = `settings-message ${statusClass}`.trim();
+  }
+
+  function setMediaSettingsBusy(busy) {
+    el('reloadMediaSettings').disabled = busy;
+    el('saveMediaSettings').disabled = busy;
+    el('addMoviePath').disabled = busy;
+    el('addTvShowPath').disabled = busy;
+  }
+
+  function getErrorMessage(body, fallback) {
+    if (typeof body === 'string' && body.trim()) {
+      return body;
+    }
+
+    return body?.message || body?.error || fallback;
   }
 }

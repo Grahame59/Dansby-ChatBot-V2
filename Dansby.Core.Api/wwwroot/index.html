@@ -17,6 +17,15 @@
         </div>
       </div>
 
+      <button
+        class="settings-button"
+        id="openSettings"
+        type="button"
+        aria-haspopup="dialog"
+        aria-controls="settingsDialog">
+        Settings
+      </button>
+
       <div class="status-strip" aria-label="System status">
         <span class="status-pill" id="healthStatus">Health: checking</span>
         <span class="status-pill" id="keyStatus">Key: missing</span>
@@ -102,11 +111,6 @@
         </div>
 
         <div class="module-grid">
-          // Plex Btn was here but is now implemented and done.
-          <!-- <button class="module-tile" type="button" disabled>
-            <span>Plex</span>
-            <small>planned</small>
-          </button> -->
           <button class="module-tile" type="button" disabled>
             <span>RFID</span>
             <small>planned</small>
@@ -131,6 +135,99 @@
       </section>
     </main>
   </div>
+
+  <dialog class="settings-dialog" id="settingsDialog">
+    <form class="settings-card" method="dialog">
+      <div class="panel-header">
+        <div>
+          <h2>Settings</h2>
+          <p>Configure Dansby Console.</p>
+        </div>
+
+        <button
+          class="ghost-button"
+          id="closeSettings"
+          type="button"
+          aria-label="Close settings">
+          Close
+        </button>
+      </div>
+
+      <section class="settings-section" aria-labelledby="mediaSettingsTitle">
+        <div class="settings-section-header">
+          <div>
+            <h3 id="mediaSettingsTitle">Media Library</h3>
+            <p>Folders searched for Plex movies and TV shows.</p>
+          </div>
+
+          <button
+            class="ghost-button"
+            id="reloadMediaSettings"
+            type="button">
+            Reload
+          </button>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-header">
+            <label>Movie paths</label>
+            <button
+              class="secondary-button"
+              id="addMoviePath"
+              type="button">
+              Add path
+            </button>
+          </div>
+
+          <div
+            class="path-list"
+            id="moviePathList"
+            aria-label="Movie paths">
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-header">
+            <label>TV-show paths</label>
+            <button
+              class="secondary-button"
+              id="addTvShowPath"
+              type="button">
+              Add path
+            </button>
+          </div>
+
+          <div
+            class="path-list"
+            id="tvShowPathList"
+            aria-label="TV-show paths">
+          </div>
+        </div>
+
+        <p
+          class="settings-message"
+          id="mediaSettingsStatus"
+          role="status">
+        </p>
+      </section>
+
+      <div class="settings-actions">
+        <button
+          class="ghost-button"
+          id="cancelSettings"
+          type="button">
+          Cancel
+        </button>
+
+        <button
+          class="primary-button"
+          id="saveMediaSettings"
+          type="button">
+          Save changes
+        </button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="app.js"></script>
 </body>

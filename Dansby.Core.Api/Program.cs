@@ -149,6 +149,12 @@ internal class Program
 
         protectedApi.MapPost("/intents", EnqueueIntent)
             .RequireRateLimiting("intents");
+        
+        protectedApi.MapGet("/api/settings/media", GetMediaSettings)
+            .RequireRateLimiting("intents");
+
+        protectedApi.MapPut("/api/settings/media", UpdateMediaSettings)
+            .RequireRateLimiting("intents");
 
         app.MapGet("/health", () => Results.Json(new { status = "ok" }));
     }
@@ -341,7 +347,6 @@ internal class Program
             correlationId = env.CorrelationId
         });
     }
-
     private static string ExtractLabelText(string text)
     {
         string[] separators = [":", "-"];
@@ -362,5 +367,26 @@ internal class Program
         return position >= 0 && usedSeparator is not null
             ? text[(position + usedSeparator.Length)..].Trim()
             : string.Empty;
+    }
+
+    private static async Task<IResult> GetMediaSettings(
+    IMediaSettingsService settingsService,
+    CancellationToken ct)
+    {
+        var settings = await settingsService.GetAsync(ct);
+
+        return Results.Json(settings);
+    }
+
+    private static async Task<IResult> UpdateMediaSettings(
+        MediaLibraryOptions settings,
+        IMediaSettingsService settingsService,
+        CancellationToken ct)
+    {
+        await settingsService.SaveAsync(settings, ct);
+
+        var savedSettings = await settingsService.GetAsync(ct);
+
+        return Results.Json(savedSettings);
     }
 }
