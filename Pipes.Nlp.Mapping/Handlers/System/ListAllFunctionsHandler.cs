@@ -1,5 +1,4 @@
 // Pipes.Nlp.Mapping/Handlers/System/ListAllFunctionsHandler.cs
-using System.Text;
 using System.Text.Json;
 using Dansby.Shared;
 using Microsoft.Extensions.DependencyInjection;
@@ -95,27 +94,30 @@ public sealed class ListAllFunctionsHandler : IIntentHandler
             })
             .ToArray();
 
-        var sb = new StringBuilder();
-
-        if (!string.IsNullOrWhiteSpace(domain))
+        var replyLines = new List<string>
         {
-            sb.Append(
-                $"I found {total} registered functions in the {domain} domain.");
+            !string.IsNullOrWhiteSpace(domain)
+                ? $"I found {total} registered functions in the {domain} domain:"
+                : $"I currently have {total} registered functions:"
+        };
+
+        if (items.Length == 0)
+        {
+            replyLines.Add("No functions matched the requested filters.");
         }
         else
         {
-            sb.Append(
-                $"I currently have {total} registered functions.");
+            foreach (var item in items)
+            {
+                replyLines.Add($"- {item.name}: {item.summary}");
+            }
         }
 
-        if (items.Length > 0)
-        {
-            sb.Append(" I've listed them in the response panel.");
-        }
+        var reply = string.Join(Environment.NewLine, replyLines);
 
         var sayPayload = JsonSerializer.SerializeToElement(new
         {
-            text = sb.ToString().TrimEnd()
+            text = reply
         });
 
         _queue.Enqueue(new Envelope(
@@ -128,6 +130,7 @@ public sealed class ListAllFunctionsHandler : IIntentHandler
 
         var result = new
         {
+            reply,
             total,
             page,
             pageSize,
