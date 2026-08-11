@@ -344,6 +344,7 @@ function setPrintMode(enabled) {
   } catch {
     // Text area is not JSON; nothing to update.
   }
+}
 
   async function openSettings() {
     const dialog = el('settingsDialog');
@@ -586,4 +587,4 @@ function setPrintMode(enabled) {
 
     return body?.message || body?.error || fallback;
   }
-}
+
