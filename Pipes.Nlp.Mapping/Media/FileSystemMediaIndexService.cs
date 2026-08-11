@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System.Text.RegularExpressions;
 
 namespace Pipes.Nlp.Mapping.Media;
@@ -12,7 +11,7 @@ namespace Pipes.Nlp.Mapping.Media;
 /// </summary>
 public sealed class FileSystemMediaIndexService : IMediaIndexService
 {
-    private readonly MediaLibraryOptions _options;
+    private readonly IMediaSettingsService _settingsService;
     private readonly ILogger<FileSystemMediaIndexService> _log;
 
     private static readonly Regex TitleYearPattern = new(
@@ -20,27 +19,26 @@ public sealed class FileSystemMediaIndexService : IMediaIndexService
         RegexOptions.Compiled);
 
     public FileSystemMediaIndexService(
-        IOptions<MediaLibraryOptions> options,
+        IMediaSettingsService settingsService,
         ILogger<FileSystemMediaIndexService> log)
     {
-        _options = options.Value;
+        _settingsService = settingsService;
         _log = log;
     }
 
-    public Task<IReadOnlyList<MediaItem>> GetAllAsync(
-        CancellationToken ct)
+    public async Task<IReadOnlyList<MediaItem>> GetAllAsync(
+    CancellationToken ct)
     {
+        var settings = await _settingsService.GetAsync(ct);
         var items = new List<MediaItem>();
 
-        ScanMoviePaths(items, ct);
-        ScanTvShowPaths(items, ct);
+        ScanMoviePaths(items, settings.MoviePaths, ct);
+        ScanTvShowPaths(items, settings.TvShowPaths, ct);
 
-        var orderedItems = items
+        return items
             .OrderBy(item => item.Type)
             .ThenBy(item => item.Title)
             .ToList();
-
-        return Task.FromResult<IReadOnlyList<MediaItem>>(orderedItems);
     }
 
     public async Task<IReadOnlyList<MediaItem>> SearchAsync(
@@ -70,9 +68,10 @@ public sealed class FileSystemMediaIndexService : IMediaIndexService
 
     private void ScanMoviePaths(
         List<MediaItem> items,
+        IEnumerable<string> moviePaths,
         CancellationToken ct)
     {
-        foreach (var rootPath in _options.MoviePaths)
+        foreach (var rootPath in moviePaths)
         {
             ct.ThrowIfCancellationRequested();
 
@@ -105,9 +104,10 @@ public sealed class FileSystemMediaIndexService : IMediaIndexService
 
     private void ScanTvShowPaths(
         List<MediaItem> items,
+        IEnumerable<string> tvShowPaths,
         CancellationToken ct)
     {
-        foreach (var rootPath in _options.TvShowPaths)
+        foreach (var rootPath in tvShowPaths)
         {
             ct.ThrowIfCancellationRequested();
 

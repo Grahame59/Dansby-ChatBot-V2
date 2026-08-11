@@ -4,7 +4,7 @@ using Dansby.Core.Api.Infrastructure;
 using Dansby.Shared;
 using Microsoft.AspNetCore.RateLimiting;
 using Pipes.Nlp.Mapping;
-using Pipes.Nlp.Mapping.Media; 
+using Pipes.Nlp.Mapping.Media;
 
 internal class Program
 {
@@ -62,8 +62,24 @@ internal class Program
         builder.Services.AddSingleton<IIntentHandler, UiSayLogHandler>();
 
         // Media library services
-        builder.Services.Configure<MediaLibraryOptions>(builder.Configuration.GetSection("MediaLibrary"));
-        builder.Services.AddSingleton<IMediaIndexService,FileSystemMediaIndexService>();
+        builder.Services.AddSingleton<IMediaSettingsService>(sp =>
+        {
+            var localAppData = Environment.GetFolderPath(
+                Environment.SpecialFolder.LocalApplicationData);
+
+            var settingsPath = Path.Combine(
+                localAppData,
+                "Dansby",
+                "media-settings.json");
+
+            return new JsonMediaSettingsService(
+                settingsPath,
+                sp.GetRequiredService<ILogger<JsonMediaSettingsService>>());
+        });
+
+        builder.Services.AddSingleton<
+            IMediaIndexService,
+            FileSystemMediaIndexService>();
 
         // Zebra printer services
         builder.Services.AddSingleton<IIntentHandler, Pipes.Devices.ZebraPrinter.ZebraPrintSimpleHandler>();
