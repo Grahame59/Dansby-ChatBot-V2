@@ -90,7 +90,7 @@ public sealed class ListAllFunctionsHandler : IIntentHandler
             .Select(metadata => new
             {
                 name = metadata.Name,
-                summary = metadata.Summary
+                summary = GetDisplaySummary(metadata)
             })
             .ToArray();
 
@@ -151,6 +151,32 @@ public sealed class ListAllFunctionsHandler : IIntentHandler
 
         return Task.FromResult(HandlerResult.Success(result));
     }
+
+    private static string GetDisplaySummary(IntentMetadata metadata) =>
+        metadata.Name.ToLowerInvariant() switch
+        {
+            "chat.compliment" => "Responds to compliments directed at Dansby.",
+            "chat.farewell" => "Responds when the user says goodbye or ends the conversation.",
+            "chat.greet" => "Responds to greetings such as hello, hi, or good morning.",
+            "chat.help" => "Explains how to interact with Dansby and the capabilities currently available.",
+            "chat.howareyou" => "Responds when the user asks how Dansby is doing.",
+            "chat.love" => "Responds to affectionate or loving statements directed at Dansby.",
+            "chat.missedyou.reply" => "Responds when the user says they missed Dansby.",
+            "chat.name.asked" => "Responds when the user asks Dansby its name.",
+            "chat.name.confirm" => "Handles confirmation of Dansby's name.",
+            "chat.name.spelling" => "Responds when the user asks how Dansby is spelled.",
+            "chat.thanks.reply" => "Responds when the user expresses thanks or appreciation.",
+            "fun.easteregg.steven" => "Triggers Dansby's Steven easter egg response.",
+            "sys.meta.creator" => "Answers questions about Dansby's creator.",
+            "sys.meta.favoritecolor" => "Answers questions about Dansby's favorite color.",
+            "sys.status.current" => "Reports Dansby's current system status.",
+            "sys.time.date" => "Returns the current date.",
+            "sys.time.dayofweek" => "Returns the current day of the week.",
+            "sys.time.now" => "Returns the current local time.",
+            "weather.forecast" => "Provides a weather forecast.",
+            "weather.temperature" => "Provides the current temperature.",
+            _ => metadata.Summary
+        };
 
     private static string? TryGetString(JsonElement el, string name) =>
         el.TryGetProperty(name, out var value) &&
