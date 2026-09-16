@@ -33,104 +33,148 @@
       </div>
     </header>
 
-    <main class="dashboard">
-      <section class="command-panel" aria-labelledby="commandTitle">
-        <div class="panel-header">
-          <div>
-            <h2 id="commandTitle">Command</h2>
-            <p id="modeCaption">Respond returns the handler result immediately.</p>
+    <nav class="workspace-tabs" role="tablist" aria-label="Dansby workspace">
+      <button class="workspace-tab" id="mainUiTab" type="button" role="tab" aria-selected="false" aria-controls="mainUiPanel">
+        MainUI
+      </button>
+      <button class="workspace-tab active" id="devUiTab" type="button" role="tab" aria-selected="true" aria-controls="devUiPanel">
+        DevUI
+      </button>
+    </nav>
+
+    <main class="workspace">
+      <section class="workspace-panel main-ui-panel" id="mainUiPanel" role="tabpanel" aria-labelledby="mainUiTab" hidden>
+        <div class="main-ui-inner">
+          <div class="assistant-heading">
+            <div class="assistant-avatar" aria-hidden="true">D</div>
+            <div>
+              <h2>Dansby</h2>
+              <p>Your local assistant.</p>
+            </div>
           </div>
-          <button class="ghost-button" id="clearInput" type="button">Clear</button>
-        </div>
 
-        <label class="field-label" for="apiKey">API key</label>
-        <input id="apiKey" class="text-input" type="password" autocomplete="off" placeholder="X-Api-Key">
+          <div class="chat-history" id="chatHistory" aria-live="polite">
+            <div class="chat-message assistant-message">
+              <div class="chat-bubble">Hey! What can I help you with?</div>
+            </div>
+          </div>
 
-        <div class="segmented" role="tablist" aria-label="Command mode">
-          <button class="segment active" data-mode="respond" type="button">Respond</button>
-          <button class="segment" data-mode="route" type="button">Route</button>
-          <button class="segment" data-mode="recognize" type="button">Recognize</button>
-          <button class="segment" data-mode="debug" type="button">Debug</button>
-        </div>
+          <div class="assistant-shortcuts" aria-label="Assistant shortcuts">
+            <button class="assistant-shortcut" type="button" data-chat-prompt="What's the weather?">Weather</button>
+            <button class="assistant-shortcut" type="button" data-chat-prompt="What time is it?">Time</button>
+            <button class="assistant-shortcut" type="button" data-chat-prompt="What's today's date?">Date</button>
+          </div>
 
-        <label class="field-label" for="text">Input</label>
-        <textarea id="text" class="command-input" rows="12" spellcheck="true"></textarea>
-
-        <div class="action-row">
-          <button class="primary-button" id="runCommand" type="button">Respond</button>
-          <button class="secondary-button" id="copyRaw" type="button">Copy JSON</button>
+          <form class="chat-composer" id="chatComposer">
+            <label class="sr-only" for="chatInput">Message Dansby</label>
+            <textarea id="chatInput" class="chat-input" rows="1" placeholder="Ask Dansby anything..." autocomplete="off" spellcheck="true"></textarea>
+            <button class="chat-send" id="chatSend" type="submit" aria-label="Send message">➤</button>
+          </form>
+          <p class="chat-hint">Dansby is running locally. More assistant capabilities are coming.</p>
         </div>
       </section>
 
-      <section class="output-panel" aria-labelledby="outputTitle">
-        <div class="panel-header">
-          <div>
-            <h2 id="outputTitle">Output</h2>
-            <p id="lastEndpoint">No request sent</p>
-          </div>
-          <button class="ghost-button" id="clearOutput" type="button">Clear</button>
-        </div>
+      <section class="workspace-panel dev-ui-panel" id="devUiPanel" role="tabpanel" aria-labelledby="devUiTab">
+        <div class="dashboard">
+          <section class="command-panel" aria-labelledby="commandTitle">
+            <div class="panel-header">
+              <div>
+                <h2 id="commandTitle">Command</h2>
+                <p id="modeCaption">Respond returns the handler result immediately.</p>
+              </div>
+              <button class="ghost-button" id="clearInput" type="button">Clear</button>
+            </div>
 
-        <div class="reply-box" id="prettyReply">Ready.</div>
+            <label class="field-label" for="apiKey">API key</label>
+            <input id="apiKey" class="text-input" type="password" autocomplete="off" placeholder="X-Api-Key">
 
-        <div class="raw-header">
-          <span>Raw JSON</span>
-          <span id="responseCode">--</span>
-        </div>
-        <pre id="out" class="raw-output">{}</pre>
-      </section>
+            <div class="segmented" role="tablist" aria-label="Command mode">
+              <button class="segment active" data-mode="respond" type="button">Respond</button>
+              <button class="segment" data-mode="route" type="button">Route</button>
+              <button class="segment" data-mode="recognize" type="button">Recognize</button>
+              <button class="segment" data-mode="debug" type="button">Debug</button>
+            </div>
 
-      <section class="tool-panel" aria-labelledby="zebraTitle">
-        <div class="panel-header">
-          <div>
-            <h2 id="zebraTitle">Zebra</h2>
-            <p>Mailer CSV builder</p>
-          </div>
-          <span class="panel-badge">local</span>
-        </div>
+            <label class="field-label" for="text">Input</label>
+            <textarea id="text" class="command-input" rows="12" spellcheck="true"></textarea>
 
-        <input id="csvFile" class="file-input" type="file" accept=".csv,text/csv">
+            <div class="action-row">
+              <button class="primary-button" id="runCommand" type="button">Respond</button>
+              <button class="secondary-button" id="copyRaw" type="button">Copy JSON</button>
+            </div>
+          </section>
 
-        <div class="toggle-row" role="group" aria-label="Print mode">
-          <button class="toggle active" id="setPreview" type="button">Preview</button>
-          <button class="toggle" id="setPrint" type="button">Print</button>
-        </div>
+          <section class="output-panel" aria-labelledby="outputTitle">
+            <div class="panel-header">
+              <div>
+                <h2 id="outputTitle">Output</h2>
+                <p id="lastEndpoint">No request sent</p>
+              </div>
+              <button class="ghost-button" id="clearOutput" type="button">Clear</button>
+            </div>
 
-        <div class="action-row compact">
-          <button class="secondary-button" id="loadCsv" type="button">Load CSV</button>
-          <button class="ghost-button" id="debugTemplate" type="button">Template</button>
-        </div>
-      </section>
+            <div class="reply-box" id="prettyReply">Ready.</div>
 
-      <section class="modules-panel" aria-labelledby="modulesTitle">
-        <div class="panel-header">
-          <div>
-            <h2 id="modulesTitle">Modules</h2>
-            <p>Roadmap surfaces</p>
-          </div>
-        </div>
+            <div class="raw-header">
+              <span>Raw JSON</span>
+              <span id="responseCode">--</span>
+            </div>
+            <pre id="out" class="raw-output">{}</pre>
+          </section>
 
-        <div class="module-grid">
-          <button class="module-tile" type="button" disabled>
-            <span>RFID</span>
-            <small>planned</small>
-          </button>
-          <button class="module-tile" type="button" disabled>
-            <span>Cameras</span>
-            <small>planned</small>
-          </button>
-          <button class="module-tile" type="button" disabled>
-            <span>Backups</span>
-            <small>planned</small>
-          </button>
-          <button class="module-tile" type="button" disabled>
-            <span>Minecraft</span>
-            <small>planned</small>
-          </button>
-          <button class="module-tile" type="button" disabled>
-            <span>Pets</span>
-            <small>planned</small>
-          </button>
+          <section class="tool-panel" aria-labelledby="zebraTitle">
+            <div class="panel-header">
+              <div>
+                <h2 id="zebraTitle">Zebra</h2>
+                <p>Mailer CSV builder</p>
+              </div>
+              <span class="panel-badge">local</span>
+            </div>
+
+            <input id="csvFile" class="file-input" type="file" accept=".csv,text/csv">
+
+            <div class="toggle-row" role="group" aria-label="Print mode">
+              <button class="toggle active" id="setPreview" type="button">Preview</button>
+              <button class="toggle" id="setPrint" type="button">Print</button>
+            </div>
+
+            <div class="action-row compact">
+              <button class="secondary-button" id="loadCsv" type="button">Load CSV</button>
+              <button class="ghost-button" id="debugTemplate" type="button">Template</button>
+            </div>
+          </section>
+
+          <section class="modules-panel" aria-labelledby="modulesTitle">
+            <div class="panel-header">
+              <div>
+                <h2 id="modulesTitle">Modules</h2>
+                <p>Roadmap surfaces</p>
+              </div>
+            </div>
+
+            <div class="module-grid">
+              <button class="module-tile" type="button" disabled>
+                <span>RFID</span>
+                <small>planned</small>
+              </button>
+              <button class="module-tile" type="button" disabled>
+                <span>Cameras</span>
+                <small>planned</small>
+              </button>
+              <button class="module-tile" type="button" disabled>
+                <span>Backups</span>
+                <small>planned</small>
+              </button>
+              <button class="module-tile" type="button" disabled>
+                <span>Minecraft</span>
+                <small>planned</small>
+              </button>
+              <button class="module-tile" type="button" disabled>
+                <span>Pets</span>
+                <small>planned</small>
+              </button>
+            </div>
+          </section>
         </div>
       </section>
     </main>
@@ -230,5 +274,115 @@
   </dialog>
 
   <script src="app.js"></script>
+  <script>
+    (() => {
+      const mainTab = document.getElementById('mainUiTab');
+      const devTab = document.getElementById('devUiTab');
+      const mainPanel = document.getElementById('mainUiPanel');
+      const devPanel = document.getElementById('devUiPanel');
+      const chatComposer = document.getElementById('chatComposer');
+      const chatInput = document.getElementById('chatInput');
+      const chatHistory = document.getElementById('chatHistory');
+      const chatSend = document.getElementById('chatSend');
+
+      function selectWorkspace(workspace) {
+        const isMain = workspace === 'main';
+        mainTab.classList.toggle('active', isMain);
+        devTab.classList.toggle('active', !isMain);
+        mainTab.setAttribute('aria-selected', String(isMain));
+        devTab.setAttribute('aria-selected', String(!isMain));
+        mainPanel.hidden = !isMain;
+        devPanel.hidden = isMain;
+      }
+
+      mainTab.addEventListener('click', () => selectWorkspace('main'));
+      devTab.addEventListener('click', () => selectWorkspace('dev'));
+
+      document.querySelectorAll('[data-chat-prompt]').forEach(button => {
+        button.addEventListener('click', () => {
+          chatInput.value = button.dataset.chatPrompt || '';
+          chatComposer.requestSubmit();
+        });
+      });
+
+      chatInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          chatComposer.requestSubmit();
+        }
+      });
+
+      chatComposer.addEventListener('submit', async event => {
+        event.preventDefault();
+        const text = chatInput.value.trim();
+        if (!text || chatSend.disabled) return;
+
+        addChatMessage(text, 'user');
+        chatInput.value = '';
+        chatSend.disabled = true;
+        const thinking = addChatMessage('Thinking...', 'assistant', true);
+
+        try {
+          const response = await fetch('/debug/respond', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Api-Key': document.getElementById('apiKey')?.value.trim() || ''
+            },
+            body: JSON.stringify({ text })
+          });
+
+          const bodyText = await response.text();
+          let body = {};
+          try {
+            body = bodyText ? JSON.parse(bodyText) : {};
+          } catch {
+            body = { response: bodyText };
+          }
+
+          const reply = extractChatReply(body) || (response.ok ? 'Done.' : 'I could not complete that request.');
+          thinking.querySelector('.chat-bubble').textContent = reply;
+          thinking.classList.remove('thinking');
+        } catch (error) {
+          thinking.querySelector('.chat-bubble').textContent = `I could not reach Dansby: ${error?.message || error}`;
+          thinking.classList.remove('thinking');
+        } finally {
+          chatSend.disabled = false;
+          chatInput.focus();
+          chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+      });
+
+      function addChatMessage(text, role, thinking = false) {
+        const row = document.createElement('div');
+        row.className = `chat-message ${role === 'user' ? 'user-message' : 'assistant-message'}${thinking ? ' thinking' : ''}`;
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-bubble';
+        bubble.textContent = text;
+        row.appendChild(bubble);
+        chatHistory.appendChild(row);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+        return row;
+      }
+
+      function extractChatReply(obj) {
+        if (!obj || typeof obj !== 'object') return typeof obj === 'string' ? obj : '';
+        for (const key of ['reply', 'text', 'message', 'response']) {
+          if (typeof obj[key] === 'string' && obj[key].trim()) return obj[key];
+        }
+        for (const key of ['result', 'data', 'payload']) {
+          const reply = extractChatReply(obj[key]);
+          if (reply) return reply;
+        }
+        if (Array.isArray(obj.items)) {
+          for (const item of obj.items) {
+            const reply = extractChatReply(item);
+            if (reply) return reply;
+          }
+        }
+        return '';
+      }
+    })();
+  </script>
 </body>
 </html>
