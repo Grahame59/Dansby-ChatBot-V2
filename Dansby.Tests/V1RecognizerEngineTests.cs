@@ -43,6 +43,44 @@ public sealed class V1RecognizerEngineTests
         Assert.Equal(1.0, score);
     }
 
+     [Fact]
+    public void Load_RecomputesExampleTokensUsingCurrentTokenizer()
+    {
+        var intentFile = Path.GetTempFileName();
+
+        try
+        {
+            File.WriteAllText(intentFile, """
+            [
+              {
+                "name": "test.light",
+                "examples": [
+                  {
+                    "utterance": "can you turn on the kitchen light",
+                    "tokens": ["completely", "stale", "tokens"]
+                  }
+                ]
+              }
+            ]
+            """);
+
+            var engine = new V1RecognizerEngine(
+                NullLogger<V1RecognizerEngine>.Instance,
+                new V1Tokenizer());
+
+            engine.Load(intentFile);
+
+            var (intent, score) = engine.RecognizeBest("turn on the kitchen light");
+
+            Assert.Equal("test.light", intent);
+            Assert.True(score > 0);
+        }
+        finally
+        {
+            File.Delete(intentFile);
+        }
+    }
+    
     private static V1RecognizerEngine CreateLoadedEngine()
     {
         var engine = new V1RecognizerEngine(

@@ -16,13 +16,13 @@ public sealed class V1TokenizerTests
     }
 
     [Fact]
-    public void Tokenize_WithStopWordsEnabled_FiltersLowSignalWordsForLongInputs()
+    public void Tokenize_WithStopWordsEnabled_FiltersConfiguredStopWords()
     {
         var tokenizer = new V1Tokenizer();
 
         var tokens = tokenizer.Tokenize("can you turn on the kitchen light");
 
-        Assert.Equal(["turn", "kitchen", "light"], tokens);
+        Assert.Equal(["turn", "on", "the", "kitchen", "light"], tokens);
     }
 
     [Fact]

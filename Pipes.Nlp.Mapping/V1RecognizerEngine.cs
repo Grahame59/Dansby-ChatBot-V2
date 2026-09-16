@@ -33,11 +33,11 @@ public sealed class V1RecognizerEngine
 
             foreach (var intent in intents)
             {
-                // Always recompute example tokens (ignore tokens in JSON)
                 foreach (var ex in intent.Examples)
-                    if (ex.Tokens is null || ex.Tokens.Count == 0)
-                        ex.Tokens = _tokenizer.Tokenize(ex.Utterance, filterStopWords: true)
-                                            .ToArray();
+                {
+                    ex.Tokens = _tokenizer.Tokenize(ex.Utterance, filterStopWords: true)
+                                        .ToArray();
+                }
             }
 
             _intents = intents;
