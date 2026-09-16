@@ -173,8 +173,8 @@ public sealed class ListAllFunctionsHandler : IIntentHandler
             "sys.time.date" => "Returns the current date.",
             "sys.time.dayofweek" => "Returns the current day of the week.",
             "sys.time.now" => "Returns the current local time.",
-            "weather.forecast" => "Provides a weather forecast.",
-            "weather.temperature" => "Provides the current temperature.",
+            "weather.forecast" => "Provides a weather forecast. (WIP)",
+            "weather.temperature" => "Provides the current temperature. (WIP)",
             _ => metadata.Summary
         };
 
